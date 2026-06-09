@@ -14,6 +14,11 @@
 
 static const NSTimeInterval debugPacketTimeoutSeconds = 2.0;
 
+extern SecIdentityRef _Nullable SecIdentityCreate(
+    CFAllocatorRef _Nullable allocator,
+    SecCertificateRef certificate,
+    SecKeyRef privateKey) __attribute__((weak_import));
+
 void logger(NSString *message) {
     NSLog(@"[REYNARD_DEBUG] %@", message);
 }
@@ -295,7 +300,10 @@ SecIdentityRef copyLegacyPairingIdentity(NSError **error) {
         return NULL;
     }
     
-    SecIdentityRef identity = SecIdentityCreate(NULL, hostCertificate, privateKey);
+    SecIdentityRef identity = NULL;
+    if (SecIdentityCreate) {
+        identity = SecIdentityCreate(NULL, hostCertificate, privateKey);
+    }
     CFRelease(privateKey);
     CFRelease(hostCertificate);
     
