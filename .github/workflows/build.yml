@@ -275,10 +275,10 @@ jobs:
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             GECKO_DIST="$RUNNER_TEMP/gecko-dist" \
+            GECKO_CODE_SIGN_IDENTITY="-" \
             HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
             OTHER_LDFLAGS="" \
             OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
-            EXPANDED_CODE_SIGN_IDENTITY="-" \
-            EXPANDED_CODE_SIGN_IDENTITY_NAME="-" \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_ALLOWED=YES \
             CODE_SIGNING_REQUIRED=NO
