@@ -160,7 +160,15 @@ jobs:
           @end
 
           void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
-                               id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
+                               id<SwiftGeckoViewRuntime> _Nonnull runtime) {
+            @autoreleasepool {
+              NSString* delegateClassName = @"Reynard.AppDelegate";
+              if (NSClassFromString(delegateClassName) == Nil) {
+                delegateClassName = @"AppDelegate";
+              }
+              UIApplicationMain(argc, argv, nil, delegateClassName);
+            }
+          }
 
           void ChildProcessInit(xpc_connection_t _Nonnull connection,
                                 id<GeckoProcessExtension> _Nonnull process,
