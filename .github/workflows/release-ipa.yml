@@ -25,7 +25,7 @@ jobs:
       - name: Checkout release source
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.release_tag || github.event.release.tag_name }}
+          ref: ${{ github.ref }}
 
       - name: Show Xcode version
         run: xcodebuild -version
