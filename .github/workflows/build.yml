@@ -19,6 +19,109 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: Prepare CI Gecko stubs
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$RUNNER_TEMP/gecko-include/GeckoView"
+          mkdir -p "$RUNNER_TEMP/gecko-dist/bin"
+          mkdir -p browser/GeckoView/Support
+
+          cat > "$RUNNER_TEMP/gecko-include/mozilla-config.h" <<'EOF'
+          #ifndef MOZILLA_CONFIG_H
+          #define MOZILLA_CONFIG_H
+          #define MOZILLA_VERSION "ci"
+          #endif
+          EOF
+
+          cat > "$RUNNER_TEMP/gecko-include/GeckoView/GeckoViewSwiftSupport.h" <<'EOF'
+          #ifndef GECKOVIEW_SWIFT_SUPPORT_H
+          #define GECKOVIEW_SWIFT_SUPPORT_H
+
+          #import <Foundation/Foundation.h>
+
+          @protocol EventCallback <NSObject>
+          - (void)sendSuccess:(id _Nullable)response;
+          - (void)sendError:(id _Nullable)response;
+          @end
+
+          @protocol GeckoEventDispatcher <NSObject>
+          - (void)dispatchToGecko:(NSString* _Nonnull)type
+                           message:(id _Nullable)message
+                          callback:(id<EventCallback> _Nullable)callback;
+          @end
+
+          @protocol SwiftEventDispatcher <NSObject>
+          - (void)dispatchToSwift:(NSString* _Nonnull)type
+                           message:(id _Nullable)message
+                          callback:(id<EventCallback> _Nullable)callback;
+          - (void)activate;
+          - (BOOL)hasListener:(NSString* _Nonnull)type;
+          @end
+
+          @protocol SwiftGeckoViewRuntime <NSObject>
+          - (id<SwiftEventDispatcher> _Nonnull)runtimeDispatcher;
+          - (id<SwiftEventDispatcher> _Nonnull)dispatcherByName:(const char* _Nonnull)name;
+          @optional
+          - (void)childProcessDidStartWithPID:(int32_t)pid processType:(NSString* _Nonnull)processType;
+          @end
+
+          @protocol GeckoProcessExtension <NSObject>
+          - (void)lockdownSandbox:(NSString* _Nonnull)revision;
+          @end
+
+          #endif
+          EOF
+
+          cat > "$RUNNER_TEMP/gecko-include/GeckoView/IOSBootstrap.h" <<'EOF'
+          #ifndef IOS_BOOTSTRAP_H
+          #define IOS_BOOTSTRAP_H
+
+          #import <Foundation/Foundation.h>
+          #include <stdbool.h>
+          #include <stdint.h>
+          #include <xpc/xpc.h>
+
+          #ifndef MOZ_EXPORT
+          #define MOZ_EXPORT __attribute__((visibility("default")))
+          #endif
+
+          @protocol GeckoProcessExtension;
+          @protocol SwiftGeckoViewRuntime;
+
+          #ifdef __cplusplus
+          extern "C" {
+          #endif
+
+          MOZ_EXPORT void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
+                                          id<SwiftGeckoViewRuntime> _Nonnull runtime);
+          MOZ_EXPORT void ChildProcessInit(xpc_connection_t _Nonnull connection,
+                                           id<GeckoProcessExtension> _Nonnull process,
+                                           id<SwiftGeckoViewRuntime> _Nonnull runtime);
+          MOZ_EXPORT void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26);
+
+          #ifdef __cplusplus
+          }
+          #endif
+
+          #endif
+          EOF
+
+          cat > browser/GeckoView/Support/ReynardCIBootstrapStubs.m <<'EOF'
+          #import <Foundation/Foundation.h>
+          #import <GeckoView/GeckoViewSwiftSupport.h>
+          #import <GeckoView/IOSBootstrap.h>
+
+          void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
+                               id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
+
+          void ChildProcessInit(xpc_connection_t _Nonnull connection,
+                                id<GeckoProcessExtension> _Nonnull process,
+                                id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
+
+          void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26) {}
+          EOF
+
       - name: Build Reynard
         run: |
           set -o pipefail
@@ -28,5 +131,8 @@ jobs:
             -configuration Debug \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
+            GECKO_DIST="$RUNNER_TEMP/gecko-dist" \
+            HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
+            OTHER_LDFLAGS="" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
