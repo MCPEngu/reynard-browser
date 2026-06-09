@@ -9,7 +9,13 @@ import UIKit
 import Darwin
 
 enum MakeButtons {
-    static let hasLiquidGlass = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "_UISolariumEnabled") != nil && _UISolariumEnabled()
+    static let hasLiquidGlass: Bool = {
+        typealias SolariumEnabledFunction = @convention(c) () -> Bool
+        guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "_UISolariumEnabled") else {
+            return false
+        }
+        return unsafeBitCast(symbol, to: SolariumEnabledFunction.self)()
+    }()
     static let bookmarksLibraryActionBarButtonTag = 8701
     static let historyLibraryActionBarButtonTag = 8702
     static let downloadsLibraryActionBarButtonTag = 8703
