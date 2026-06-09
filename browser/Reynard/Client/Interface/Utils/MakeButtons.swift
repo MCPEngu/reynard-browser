@@ -7,7 +7,6 @@
 
 import UIKit
 import Darwin
-import Symbols
 
 enum MakeButtons {
     static let hasLiquidGlass = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "_UISolariumEnabled") != nil && _UISolariumEnabled()
@@ -73,16 +72,8 @@ enum MakeButtons {
     }
     
     static func updateLibraryActionsButton(_ button: UIButton, imageName: String) {
-        if hasLiquidGlass, #available(iOS 26.0, *) {
-            var configuration = UIButton.Configuration.glass()
-            configuration.image = toolbarImage(for: imageName)
-            configuration.baseForegroundColor = .reynardLabel
-            configuration.contentInsets = .zero
-            button.configuration = configuration
-        } else {
-            button.setImage(toolbarImage(for: imageName), for: .normal)
-            button.backgroundColor = .reynardQuaternarySystemFill
-        }
+        button.setImage(toolbarImage(for: imageName), for: .normal)
+        button.backgroundColor = .reynardQuaternarySystemFill
     }
     
     static func installLibraryActionBarButton(_ item: UIBarButtonItem, in navigationItem: UINavigationItem) {
@@ -232,8 +223,16 @@ final class DownloadToolbarButton: UIButton {
     }
     
     private func playBounceAnimation() {
-        if #available(iOS 17.0, *) {
-            iconView.addSymbolEffect(.bounce)
-        }
+        iconView.transform = CGAffineTransform(scaleX: 0.86, y: 0.86)
+        UIView.animate(
+            withDuration: 0.32,
+            delay: 0,
+            usingSpringWithDamping: 0.45,
+            initialSpringVelocity: 0.6,
+            options: [.allowUserInteraction, .beginFromCurrentState],
+            animations: {
+                self.iconView.transform = .identity
+            }
+        )
     }
 }
