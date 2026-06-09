@@ -45,7 +45,13 @@ cat > OpenIn.entitlements <<'EOF'
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>com.minh-ton.Reynard.OpenIn</string>
+	<string>NAR5D6HWAD.com.minh-ton.Reynard.OpenIn</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>NAR5D6HWAD</string>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>NAR5D6HWAD.com.minh-ton.Reynard.OpenIn</string>
+	</array>
 	<key>get-task-allow</key>
 	<true/>
 </dict>
