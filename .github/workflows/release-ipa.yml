@@ -1,0 +1,353 @@
+name: Release IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: GitHub release tag to package and upload
+        required: true
+        default: 0.4.1
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    name: Build and upload IPA
+    runs-on: macos-15
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+      GECKO_DIST: ${{ runner.temp }}/gecko-dist
+      GECKO_INCLUDE: ${{ runner.temp }}/gecko-include
+
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.event.release.tag_name }}
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Prepare CI Gecko stubs
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$GECKO_INCLUDE/GeckoView"
+          mkdir -p "$GECKO_DIST/bin"
+          mkdir -p engine/firefox/toolkit/mozapps/extensions/default-theme
+          mkdir -p browser/GeckoView/Support
+
+          cat > "$GECKO_DIST/bin/reynard-ci-xul.c" <<'EOF'
+          int main(void) { return 0; }
+          EOF
+          CLANG="$(xcrun --sdk iphoneos --find clang)"
+          SDK_PATH="$(xcrun --sdk iphoneos --show-sdk-path)"
+          "$CLANG" \
+            -arch arm64 \
+            -isysroot "$SDK_PATH" \
+            -miphoneos-version-min=12.0 \
+            "$GECKO_DIST/bin/reynard-ci-xul.c" \
+            -o "$GECKO_DIST/bin/XUL"
+          rm "$GECKO_DIST/bin/reynard-ci-xul.c"
+          echo '{}' > engine/firefox/toolkit/mozapps/extensions/default-theme/manifest.json
+
+          cat > "$GECKO_INCLUDE/mozilla-config.h" <<'EOF'
+          #ifndef MOZILLA_CONFIG_H
+          #define MOZILLA_CONFIG_H
+          #define MOZILLA_VERSION "ci"
+          #endif
+          EOF
+
+          cat > "$GECKO_INCLUDE/GeckoView/GeckoViewSwiftSupport.h" <<'EOF'
+          #ifndef GECKOVIEW_SWIFT_SUPPORT_H
+          #define GECKOVIEW_SWIFT_SUPPORT_H
+
+          #import <Foundation/Foundation.h>
+
+          @protocol EventCallback <NSObject>
+          - (void)sendSuccess:(id _Nullable)response;
+          - (void)sendError:(id _Nullable)response;
+          @end
+
+          @protocol GeckoEventDispatcher <NSObject>
+          - (void)dispatchToGecko:(NSString* _Nonnull)type
+                           message:(id _Nullable)message
+                          callback:(id<EventCallback> _Nullable)callback;
+          @end
+
+          @protocol SwiftEventDispatcher <NSObject>
+          - (void)dispatchToSwift:(NSString* _Nonnull)type
+                           message:(id _Nullable)message
+                          callback:(id<EventCallback> _Nullable)callback;
+          - (void)activate;
+          - (BOOL)hasListener:(NSString* _Nonnull)type;
+          @end
+
+          @protocol SwiftGeckoViewRuntime <NSObject>
+          - (id<SwiftEventDispatcher> _Nonnull)runtimeDispatcher;
+          - (id<SwiftEventDispatcher> _Nonnull)dispatcherByName:(const char* _Nullable)name;
+          @optional
+          - (void)childProcessDidStartWithPID:(int32_t)pid processType:(NSString* _Nonnull)processType;
+          @end
+
+          @protocol GeckoProcessExtension <NSObject>
+          - (void)lockdownSandbox:(NSString* _Nonnull)revision;
+          @end
+
+          #endif
+          EOF
+
+          cat > "$GECKO_INCLUDE/GeckoView/IOSBootstrap.h" <<'EOF'
+          #ifndef IOS_BOOTSTRAP_H
+          #define IOS_BOOTSTRAP_H
+
+          #import <Foundation/Foundation.h>
+          #import <UIKit/UIKit.h>
+          #include <stdbool.h>
+          #include <stdint.h>
+          #include <xpc/xpc.h>
+
+          #ifndef MOZ_EXPORT
+          #define MOZ_EXPORT __attribute__((visibility("default")))
+          #endif
+
+          @protocol GeckoProcessExtension;
+          @protocol SwiftGeckoViewRuntime;
+          @protocol SwiftEventDispatcher;
+
+          @interface GeckoViewWindow : NSObject
+          - (UIView* _Nullable)view;
+          - (void)close;
+          @end
+
+          #ifdef __cplusplus
+          extern "C" {
+          #endif
+
+          MOZ_EXPORT void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
+                                          id<SwiftGeckoViewRuntime> _Nonnull runtime);
+          MOZ_EXPORT void ChildProcessInit(xpc_connection_t _Nonnull connection,
+                                           id<GeckoProcessExtension> _Nonnull process,
+                                           id<SwiftGeckoViewRuntime> _Nonnull runtime);
+          MOZ_EXPORT void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26);
+          MOZ_EXPORT GeckoViewWindow* _Nullable GeckoViewOpenWindow(
+              NSString* _Nullable windowId,
+              id<SwiftEventDispatcher> _Nonnull dispatcher,
+              NSDictionary* _Nonnull options,
+              BOOL isPrivate);
+
+          #ifdef __cplusplus
+          }
+          #endif
+
+          #endif
+          EOF
+
+          cat > browser/GeckoView/Support/ReynardCIBootstrapStubs.m <<'EOF'
+          #import <Foundation/Foundation.h>
+          #import <UIKit/UIKit.h>
+          #import <GeckoView/GeckoViewSwiftSupport.h>
+          #import <GeckoView/IOSBootstrap.h>
+
+          @implementation GeckoViewWindow
+          - (UIView* _Nullable)view { return nil; }
+          - (void)close {}
+          @end
+
+          void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
+                               id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
+
+          void ChildProcessInit(xpc_connection_t _Nonnull connection,
+                                id<GeckoProcessExtension> _Nonnull process,
+                                id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
+
+          void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26) {}
+
+          GeckoViewWindow* _Nullable GeckoViewOpenWindow(
+              NSString* _Nullable windowId,
+              id<SwiftEventDispatcher> _Nonnull dispatcher,
+              NSDictionary* _Nonnull options,
+              BOOL isPrivate) {
+            return [GeckoViewWindow new];
+          }
+          EOF
+
+          cat > browser/Reynard/JIT/ReynardCIIdeviceStubs.c <<'EOF'
+          #include "IdeviceFFI.h"
+
+          IdeviceFfiError *idevice_pairing_file_read(const char *path,
+                                                     IdevicePairingFile **pairing_file) { return NULL; }
+          void idevice_pairing_file_free(IdevicePairingFile *pairing_file) {}
+          IdeviceFfiError *rp_pairing_file_read(const char *path,
+                                                RpPairingFileHandle **out) { return NULL; }
+          void rp_pairing_file_free(RpPairingFileHandle *handle) {}
+          IdeviceFfiError *tunnel_create_rppairing(
+              const struct sockaddr *addr, socklen_t addr_len, const char *hostname,
+              RpPairingFileHandle *pairing_file, const char *(*pin_callback)(void *context),
+              void *pin_context, AdapterHandle **out_adapter,
+              RsdHandshakeHandle **out_handshake) { return NULL; }
+          IdeviceFfiError *idevice_tcp_provider_new(const struct sockaddr *ip,
+                                                    IdevicePairingFile *pairing_file,
+                                                    const char *label,
+                                                    IdeviceProviderHandle **provider) { return NULL; }
+          IdeviceFfiError *idevice_provider_get_pairing_file(IdeviceProviderHandle *provider,
+                                                            IdevicePairingFile **pairing_file) { return NULL; }
+          void idevice_provider_free(IdeviceProviderHandle *provider) {}
+          IdeviceFfiError *lockdownd_connect(IdeviceProviderHandle *provider,
+                                             LockdowndClientHandle **client) { return NULL; }
+          IdeviceFfiError *lockdownd_start_session(LockdowndClientHandle *client,
+                                                   IdevicePairingFile *pairing_file) { return NULL; }
+          IdeviceFfiError *lockdownd_start_service(LockdowndClientHandle *client,
+                                                   const char *identifier, uint16_t *port,
+                                                   bool *ssl) { return NULL; }
+          IdeviceFfiError *lockdownd_get_value(LockdowndClientHandle *client,
+                                               const char *key, const char *domain,
+                                               plist_t *out_plist) { return NULL; }
+          void lockdownd_client_free(LockdowndClientHandle *handle) {}
+          IdeviceFfiError *lockdownd_connect_rsd(AdapterHandle *provider,
+                                                 RsdHandshakeHandle *handshake,
+                                                 LockdowndClientHandle **client) { return NULL; }
+          IdeviceFfiError *image_mounter_connect(IdeviceProviderHandle *provider,
+                                                 ImageMounterHandle **client) { return NULL; }
+          IdeviceFfiError *image_mounter_connect_rsd(AdapterHandle *provider,
+                                                     RsdHandshakeHandle *handshake,
+                                                     ImageMounterHandle **client) { return NULL; }
+          void image_mounter_free(ImageMounterHandle *handle) {}
+          IdeviceFfiError *image_mounter_copy_devices(ImageMounterHandle *client,
+                                                      plist_t **devices,
+                                                      size_t *devices_len) { return NULL; }
+          IdeviceFfiError *image_mounter_lookup_image(ImageMounterHandle *client,
+                                                      const char *image_type,
+                                                      uint8_t **signature,
+                                                      size_t *signature_len) { return NULL; }
+          IdeviceFfiError *image_mounter_mount_developer(ImageMounterHandle *client,
+                                                         const uint8_t *image,
+                                                         size_t image_len,
+                                                         const uint8_t *signature,
+                                                         size_t signature_len) { return NULL; }
+          IdeviceFfiError *image_mounter_mount_personalized(
+              ImageMounterHandle *client, IdeviceProviderHandle *provider,
+              const uint8_t *image, size_t image_len, const uint8_t *trust_cache,
+              size_t trust_cache_len, const uint8_t *build_manifest,
+              size_t build_manifest_len, const void *info_plist,
+              uint64_t unique_chip_id) { return NULL; }
+          IdeviceFfiError *image_mounter_mount_personalized_rsd(
+              ImageMounterHandle *client, AdapterHandle *provider,
+              RsdHandshakeHandle *handshake, const uint8_t *image, size_t image_len,
+              const uint8_t *trust_cache, size_t trust_cache_len,
+              const uint8_t *build_manifest, size_t build_manifest_len,
+              const void *info_plist, uint64_t unique_chip_id) { return NULL; }
+          IdeviceFfiError *heartbeat_connect(IdeviceProviderHandle *provider,
+                                             HeartbeatClientHandle **client) { return NULL; }
+          IdeviceFfiError *heartbeat_connect_rsd(AdapterHandle *provider,
+                                                 RsdHandshakeHandle *handshake,
+                                                 HeartbeatClientHandle **client) { return NULL; }
+          IdeviceFfiError *heartbeat_get_marco(HeartbeatClientHandle *client,
+                                               uint64_t interval,
+                                               uint64_t *new_interval) { return NULL; }
+          IdeviceFfiError *heartbeat_send_polo(HeartbeatClientHandle *client) { return NULL; }
+          void heartbeat_client_free(HeartbeatClientHandle *handle) {}
+          void adapter_free(AdapterHandle *handle) {}
+          void rsd_handshake_free(RsdHandshakeHandle *handle) {}
+          IdeviceFfiError *remote_server_connect_rsd(AdapterHandle *provider,
+                                                     RsdHandshakeHandle *handshake,
+                                                     RemoteServerHandle **handle) { return NULL; }
+          void remote_server_free(RemoteServerHandle *handle) {}
+          IdeviceFfiError *process_control_new(RemoteServerHandle *server,
+                                               ProcessControlHandle **handle) { return NULL; }
+          void process_control_free(ProcessControlHandle *handle) {}
+          IdeviceFfiError *process_control_disable_memory_limit(ProcessControlHandle *handle,
+                                                               uint64_t pid) { return NULL; }
+          IdeviceFfiError *debug_proxy_connect_rsd(AdapterHandle *provider,
+                                                   RsdHandshakeHandle *handshake,
+                                                   DebugProxyHandle **handle) { return NULL; }
+          void debug_proxy_free(DebugProxyHandle *handle) {}
+          IdeviceFfiError *debug_proxy_send_command(DebugProxyHandle *handle,
+                                                    DebugserverCommandHandle *command,
+                                                    char **response) { return NULL; }
+          IdeviceFfiError *debug_proxy_read_response(DebugProxyHandle *handle,
+                                                     char **response) { return NULL; }
+          IdeviceFfiError *debug_proxy_send_ack(DebugProxyHandle *handle) { return NULL; }
+          void debug_proxy_set_ack_mode(DebugProxyHandle *handle, int enabled) {}
+          DebugserverCommandHandle *debugserver_command_new(const char *name,
+                                                            const char *const *argv,
+                                                            uintptr_t argv_count) { return NULL; }
+          void debugserver_command_free(DebugserverCommandHandle *command) {}
+          void idevice_data_free(uint8_t *data, uintptr_t len) {}
+          void idevice_error_free(IdeviceFfiError *err) {}
+          void idevice_string_free(char *string) {}
+          void plist_free(plist_t plist) {}
+          void plist_get_string_val(plist_t node, char **val) {}
+          void plist_get_uint_val(plist_t node, uint64_t *val) {}
+          EOF
+
+      - name: Archive Reynard for iPhoneOS
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project browser/Reynard.xcodeproj \
+            -scheme Reynard \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath dist/Reynard.xcarchive \
+            GECKO_DIST="$GECKO_DIST" \
+            GECKO_CODE_SIGN_IDENTITY="-" \
+            HEADER_SEARCH_PATHS="$GECKO_INCLUDE" \
+            OTHER_LDFLAGS="" \
+            OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+
+          APP_DIR="dist/Reynard.xcarchive/Products/Applications"
+          APP_PATH="$(find "$APP_DIR" -maxdepth 1 -type d -name '*.app' | head -n 1)"
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found in $APP_DIR"
+            exit 1
+          fi
+
+          plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard" "$APP_PATH/Info.plist"
+          plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.Helper" "$APP_PATH/PlugIns/Reynard Helper.appex/Info.plist"
+          plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.OpenIn" "$APP_PATH/PlugIns/OpenIn.appex/Info.plist"
+
+          rm -rf dist/Reynard dist/Reynard.ipa
+          mkdir -p dist/Reynard/Payload
+          ditto "$APP_PATH" "dist/Reynard/Payload/$(basename "$APP_PATH")"
+          cd dist/Reynard
+          zip -qry ../Reynard.ipa Payload -x "._*" -x ".DS_Store" -x "__MACOSX"
+          cd ../..
+          ls -lh dist/Reynard.ipa
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reynard.ipa
+          path: dist/Reynard.ipa
+          if-no-files-found: error
+
+      - name: Upload IPA to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          TARGET_SHA="$(git rev-parse HEAD)"
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$TARGET_SHA" \
+              --title "Reynard $RELEASE_TAG" \
+              --notes "Release built from commit $TARGET_SHA."
+          fi
+
+          gh release upload "$RELEASE_TAG" dist/Reynard.ipa \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
