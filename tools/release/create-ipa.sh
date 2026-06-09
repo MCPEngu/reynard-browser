@@ -27,8 +27,11 @@ fi
 # I absolutely hate Apple for this
 # Why is my bundle identifier just become unavailable for no reason?
 plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard" "$APP_PATH/Info.plist"
-plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.Helper" "$APP_PATH/PlugIns/Reynard Helper.appex/Info.plist"
 plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.OpenIn" "$APP_PATH/PlugIns/OpenIn.appex/Info.plist"
+
+# iOS 12 install validation rejects the private AR viewer extension point used
+# by the Gecko helper process extension.
+rm -rf "$APP_PATH/PlugIns/Reynard Helper.appex"
 
 rm -rf "$WORK_DIR" "$ROOT_DIR/dist/Reynard.ipa" "$ROOT_DIR/dist/Reynard-TrollStore.ipa"
 mkdir -p "$WORK_DIR/Payload"
@@ -51,6 +54,5 @@ PTRACE_JIT_OUT="Payload/Reynard.app/ptrace_jit"
 chmod 0755 "$PTRACE_JIT_OUT"
 ldid -S"$ROOT_DIR/browser/Reynard/TrollStore/JIT/ptrace_jit.entitlements" "$PTRACE_JIT_OUT"
 ldid -S"$ROOT_DIR/browser/Reynard/Entitlements/Reynard.private.entitlements" "Payload/Reynard.app/Reynard"
-ldid -S"$ROOT_DIR/browser/Helper/Entitlements/Reynard-Helper.private.entitlements" "Payload/Reynard.app/PlugIns/Reynard Helper.appex/Reynard Helper"
 zip -r ../Reynard-TrollStore.tipa Payload -x "._*" -x ".DS_Store" -x "__MACOSX" # trollstore ipa
 cp ../Reynard-TrollStore.tipa ../Reynard-Jailbroken.ipa # for jailbroken users

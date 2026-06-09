@@ -301,6 +301,8 @@ jobs:
             HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
             OTHER_LDFLAGS="" \
             OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
+            CURRENT_VERSION="$RELEASE_TAG" \
+            CURRENT_BUILD="$GITHUB_RUN_NUMBER" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
@@ -316,8 +318,11 @@ jobs:
           fi
 
           plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard" "$APP_PATH/Info.plist"
-          plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.Helper" "$APP_PATH/PlugIns/Reynard Helper.appex/Info.plist"
           plutil -replace CFBundleIdentifier -string "com.minh-ton.Reynard.OpenIn" "$APP_PATH/PlugIns/OpenIn.appex/Info.plist"
+
+          # iOS 12 install validation rejects the private AR viewer extension
+          # point used by the Gecko helper process extension.
+          rm -rf "$APP_PATH/PlugIns/Reynard Helper.appex"
 
           rm -rf dist/Reynard dist/Reynard.ipa
           mkdir -p dist/Reynard/Payload
