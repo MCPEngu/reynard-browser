@@ -151,12 +151,122 @@ jobs:
           cat > browser/GeckoView/Support/ReynardCIBootstrapStubs.m <<'EOF'
           #import <Foundation/Foundation.h>
           #import <UIKit/UIKit.h>
+          #import <WebKit/WebKit.h>
           #import <GeckoView/GeckoViewSwiftSupport.h>
           #import <GeckoView/IOSBootstrap.h>
 
+          @interface GeckoViewWindow () <GeckoEventDispatcher, WKNavigationDelegate>
+          @property(nonatomic, strong) WKWebView* webView;
+          @property(nonatomic, strong) id<SwiftEventDispatcher> dispatcher;
+          - (instancetype)initWithDispatcher:(id<SwiftEventDispatcher>)dispatcher;
+          @end
+
           @implementation GeckoViewWindow
-          - (UIView* _Nullable)view { return nil; }
-          - (void)close {}
+          - (instancetype)initWithDispatcher:(id<SwiftEventDispatcher>)dispatcher {
+            self = [super init];
+            if (self) {
+              _dispatcher = dispatcher;
+              WKWebViewConfiguration* configuration = [WKWebViewConfiguration new];
+              _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
+              _webView.navigationDelegate = self;
+              _webView.backgroundColor = UIColor.whiteColor;
+              _webView.opaque = YES;
+              [self loadBlankPage];
+            }
+            return self;
+          }
+
+          - (UIView* _Nullable)view { return self.webView; }
+
+          - (void)close {
+            self.webView.navigationDelegate = nil;
+            [self.webView stopLoading];
+          }
+
+          - (void)dispatchToGecko:(NSString* _Nonnull)type
+                           message:(id _Nullable)message
+                          callback:(id<EventCallback> _Nullable)callback {
+            dispatch_async(dispatch_get_main_queue(), ^{
+              if ([type isEqualToString:@"GeckoView:LoadUri"]) {
+                NSString* uri = [message isKindOfClass:NSDictionary.class] ? ((NSDictionary*)message)[@"uri"] : nil;
+                [self loadURI:uri];
+                [callback sendSuccess:nil];
+              } else if ([type isEqualToString:@"GeckoView:Reload"]) {
+                [self.webView reload];
+                [callback sendSuccess:nil];
+              } else if ([type isEqualToString:@"GeckoView:Stop"]) {
+                [self.webView stopLoading];
+                [callback sendSuccess:nil];
+              } else if ([type isEqualToString:@"GeckoView:GoBack"]) {
+                if (self.webView.canGoBack) { [self.webView goBack]; }
+                [callback sendSuccess:nil];
+              } else if ([type isEqualToString:@"GeckoView:GoForward"]) {
+                if (self.webView.canGoForward) { [self.webView goForward]; }
+                [callback sendSuccess:nil];
+              } else if ([type isEqualToString:@"GeckoView:GetFocusedInputMetrics"]) {
+                [callback sendSuccess:@{@"bottomRatio": @0}];
+              } else {
+                [callback sendSuccess:nil];
+              }
+            });
+          }
+
+          - (void)loadURI:(NSString*)uri {
+            NSString* trimmed = [uri stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+            if (trimmed.length == 0 || [trimmed.lowercaseString isEqualToString:@"about:blank"]) {
+              [self loadBlankPage];
+              return;
+            }
+
+            NSURL* url = [NSURL URLWithString:trimmed];
+            if (url.scheme.length == 0) {
+              url = [NSURL URLWithString:[@"https://" stringByAppendingString:trimmed]];
+            }
+            if (!url || [url.scheme.lowercaseString isEqualToString:@"about"]) {
+              [self loadBlankPage];
+              return;
+            }
+            [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
+          }
+
+          - (void)loadBlankPage {
+            NSString* html = @"<!doctype html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>body{margin:0;font:-apple-system-body;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}main{max-width:28em;padding:2em}h1{font:-apple-system-headline;margin:0 0 .5em}p{color:#555;line-height:1.35}</style></head><body><main><h1>Reynard</h1><p>Enter a website in the address bar to browse.</p></main></body></html>";
+            [self.webView loadHTMLString:html baseURL:nil];
+            [self sendLocation:@"about:blank"];
+            [self sendProgress:100];
+          }
+
+          - (void)sendLocation:(NSString*)uri {
+            [self.dispatcher dispatchToSwift:@"GeckoView:LocationChange"
+                                     message:@{@"isTopLevel": @YES, @"uri": uri ?: @"about:blank", @"canGoBack": @(self.webView.canGoBack), @"canGoForward": @(self.webView.canGoForward), @"permissions": @[]}
+                                    callback:nil];
+          }
+
+          - (void)sendProgress:(NSInteger)progress {
+            [self.dispatcher dispatchToSwift:@"GeckoView:ProgressChanged"
+                                     message:@{@"progress": @(progress)}
+                                    callback:nil];
+          }
+
+          - (void)webView:(WKWebView*)webView didStartProvisionalNavigation:(WKNavigation*)navigation {
+            NSString* uri = webView.URL.absoluteString ?: @"about:blank";
+            [self.dispatcher dispatchToSwift:@"GeckoView:PageStart" message:@{@"uri": uri} callback:nil];
+            [self sendProgress:10];
+          }
+
+          - (void)webView:(WKWebView*)webView didFinishNavigation:(WKNavigation*)navigation {
+            [self sendLocation:webView.URL.absoluteString ?: @"about:blank"];
+            [self sendProgress:100];
+            [self.dispatcher dispatchToSwift:@"GeckoView:PageStop" message:@{@"success": @YES} callback:nil];
+          }
+
+          - (void)webView:(WKWebView*)webView didFailNavigation:(WKNavigation*)navigation withError:(NSError*)error {
+            [self.dispatcher dispatchToSwift:@"GeckoView:PageStop" message:@{@"success": @NO} callback:nil];
+          }
+
+          - (void)webView:(WKWebView*)webView didFailProvisionalNavigation:(WKNavigation*)navigation withError:(NSError*)error {
+            [self.dispatcher dispatchToSwift:@"GeckoView:PageStop" message:@{@"success": @NO} callback:nil];
+          }
           @end
 
           void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
@@ -181,7 +291,15 @@ jobs:
               id<SwiftEventDispatcher> _Nonnull dispatcher,
               NSDictionary* _Nonnull options,
               BOOL isPrivate) {
-            return [GeckoViewWindow new];
+            GeckoViewWindow* window = [[GeckoViewWindow alloc] initWithDispatcher:dispatcher];
+            SEL attachSelector = NSSelectorFromString(@"attach:");
+            if ([dispatcher respondsToSelector:attachSelector]) {
+              void (*attachImp)(id, SEL, id<GeckoEventDispatcher>) =
+                  (void (*)(id, SEL, id<GeckoEventDispatcher>))[dispatcher methodForSelector:attachSelector];
+              attachImp(dispatcher, attachSelector, window);
+            }
+            [dispatcher activate];
+            return window;
           }
           EOF
 
@@ -307,7 +425,7 @@ jobs:
             GECKO_DIST="$RUNNER_TEMP/gecko-dist" \
             GECKO_CODE_SIGN_IDENTITY="-" \
             HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
-            OTHER_LDFLAGS="" \
+            OTHER_LDFLAGS="-framework WebKit" \
             OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
             CURRENT_VERSION="$RELEASE_TAG" \
             CURRENT_BUILD="$GITHUB_RUN_NUMBER" \
