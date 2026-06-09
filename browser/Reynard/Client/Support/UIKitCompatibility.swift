@@ -185,19 +185,7 @@ extension UISearchBar {
             return textField
         }
 
-        return firstDescendantTextField() ?? UITextField(frame: bounds)
-    }
-
-    private func firstDescendantTextField() -> UITextField? {
-        for subview in subviews {
-            if let textField = subview as? UITextField {
-                return textField
-            }
-            if let textField = subview.firstDescendantTextField() {
-                return textField
-            }
-        }
-        return nil
+        return (self as UIView).firstDescendantTextField() ?? UITextField(frame: bounds)
     }
 }
 
