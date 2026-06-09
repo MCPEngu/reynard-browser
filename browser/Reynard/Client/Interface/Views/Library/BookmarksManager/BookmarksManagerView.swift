@@ -87,10 +87,10 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         imageName: "ellipsis",
         action: #selector(searchActionsButtonTapped)
     )
-    private var legacySearchActionsMenuDelegate: LegacySearchActionsMenuDelegate?
+    private var legacySearchActionsMenuDelegate: Any?
     private lazy var bookmarksActionsBarButtonItem: UIBarButtonItem = {
         let item = UIBarButtonItem(
-            image: UIImage(systemName: "ellipsis"),
+            image: UIImage.reynardSystemImage(named: "ellipsis"),
             style: .plain,
             target: self,
             action: #selector(searchActionsButtonTapped)
@@ -105,10 +105,10 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         return view
     }()
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        let tableView = UITableView(frame: .zero, style: .reynardInsetGrouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.alwaysBounceVertical = true
-        tableView.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = .reynardSystemGroupedBackground
         tableView.dataSource = self
         tableView.delegate = self
         tableView.keyboardDismissMode = .interactive
@@ -122,7 +122,7 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         let label = UILabel()
         label.text = "No matching bookmarks"
         label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.textAlignment = .center
         return label
     }()
@@ -145,7 +145,7 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         configureLayout()
         
         tableView.register(BookmarkItemCell.self, forCellReuseIdentifier: BookmarkItemCell.reuseIdentifier)
@@ -245,12 +245,12 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         }
         
         let container = UIView()
-        container.backgroundColor = .systemGroupedBackground
+        container.backgroundColor = .reynardSystemGroupedBackground
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = sections[section].title
         
         container.addSubview(label)
@@ -491,8 +491,8 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         let symbolName = isEditing ? "checkmark" : "ellipsis"
         
         if usesNavigationActionsButton {
-            bookmarksActionsBarButtonItem.image = UIImage(systemName: symbolName)
-            bookmarksActionsBarButtonItem.tintColor = .label
+            bookmarksActionsBarButtonItem.image = UIImage.reynardSystemImage(named: symbolName)
+            bookmarksActionsBarButtonItem.tintColor = .reynardLabel
             
             if #available(iOS 14.0, *) {
                 bookmarksActionsBarButtonItem.menu = isEditing ? nil : makeSearchActionsMenu()
@@ -511,6 +511,7 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         }
     }
     
+    @available(iOS 13.0, *)
     fileprivate func makeSearchActionsMenu() -> UIMenu {
         UIMenu(title: "", children: [
             makeSortMenu(),
@@ -524,16 +525,17 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
                 self?.updateSearchActionsButton()
             },
             UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [
-                UIAction(title: "Edit Bookmarks", image: UIImage(systemName: "pencil")) { [weak self] _ in
+                UIAction(title: "Edit Bookmarks", image: UIImage.reynardSystemImage(named: "pencil")) { [weak self] _ in
                     self?.setEditing(true, animated: true)
                 },
-                UIAction(title: "New Folder", image: UIImage(systemName: "folder.badge.plus")) { [weak self] _ in
+                UIAction(title: "New Folder", image: UIImage.reynardSystemImage(named: "folder.badge.plus")) { [weak self] _ in
                     self?.promptForNewFolder()
                 },
             ]),
         ])
     }
     
+    @available(iOS 13.0, *)
     private func makeSortMenu() -> UIMenu {
         let selectedOrder = Prefs.BookmarkSettings.sortOrders
         let sortOptions: [(title: String, order: BookmarkSortOrder)] = [
@@ -544,7 +546,7 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
         ]
         let menu = UIMenu(
             title: "Sort By",
-            image: UIImage(systemName: "arrow.up.arrow.down"),
+            image: UIImage.reynardSystemImage(named: "arrow.up.arrow.down"),
             identifier: nil,
             options: [],
             children: sortOptions.map {
@@ -707,9 +709,9 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
             constraints.append(contentsOf: [
                 searchBar.trailingAnchor.constraint(equalTo: searchActionsButton.leadingAnchor),
                 searchActionsButton.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor, constant: -20),
-                searchActionsButton.centerYAnchor.constraint(equalTo: searchBar.searchTextField.centerYAnchor),
+                searchActionsButton.centerYAnchor.constraint(equalTo: searchBar.reynardTextField.centerYAnchor),
                 searchActionsButton.widthAnchor.constraint(equalTo: searchActionsButton.heightAnchor),
-                searchActionsButton.heightAnchor.constraint(equalTo: searchBar.searchTextField.heightAnchor),
+                searchActionsButton.heightAnchor.constraint(equalTo: searchBar.reynardTextField.heightAnchor),
             ])
         }
         
@@ -872,6 +874,7 @@ private final class BookmarksFolderViewController: UIViewController, UITableView
     }
 }
 
+@available(iOS 13.0, *)
 private final class LegacySearchActionsMenuDelegate: NSObject, UIContextMenuInteractionDelegate {
     weak var owner: BookmarksFolderViewController?
     

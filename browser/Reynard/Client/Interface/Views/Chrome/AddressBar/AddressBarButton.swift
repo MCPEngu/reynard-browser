@@ -10,10 +10,10 @@ import UIKit
 final class AddressBarButton: UIButton {
     var hitArea: CGFloat = 2
     private var isMenuVisible = false
-    private var pendingMenuAfterDismissal: UIMenu?
+    private var pendingMenuAfterDismissal: Any?
     private var pendingMenuDismissalHandlers: [() -> Void] = []
-    private var contextMenuModel: UIMenu?
-    private var legacyMenuDelegate: LegacyContextMenuDelegate?
+    private var contextMenuModel: Any?
+    private var legacyMenuDelegate: Any?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,7 +30,7 @@ final class AddressBarButton: UIButton {
         contentHorizontalAlignment = .fill
         contentVerticalAlignment = .fill
         contentEdgeInsets = .zero
-        setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 14, weight: .regular), forImageIn: .normal)
+        reynardSetPreferredSymbolConfiguration(pointSize: 14)
         if #available(iOS 13.0, *) {
             if #unavailable(iOS 14.0) {
                 let delegate = LegacyContextMenuDelegate(owner: self)
@@ -54,10 +54,13 @@ final class AddressBarButton: UIButton {
         _ = interaction.perform(selector, with: center)
     }
     
-    func setMenuPreservingPresentation(_ menu: UIMenu?) {
+    func setMenuPreservingPresentation(_ menu: Any?) {
         contextMenuModel = menu
-        legacyMenuDelegate?.menu = menu
+        if #available(iOS 13.0, *) {
+            (legacyMenuDelegate as? LegacyContextMenuDelegate)?.menu = menu as? UIMenu
+        }
         if #available(iOS 14.0, *) {
+            let menu = menu as? UIMenu
             if isMenuVisible,
                let menu,
                let contextMenuInteraction = self.contextMenuInteraction {
@@ -86,6 +89,7 @@ final class AddressBarButton: UIButton {
         pendingMenuDismissalHandlers.append(action)
     }
     
+    @available(iOS 13.0, *)
     private func replacementMenu(for visibleMenu: UIMenu, in rootMenu: UIMenu) -> UIMenu? {
         if visibleMenu.identifier == rootMenu.identifier {
             return rootMenu
@@ -132,7 +136,7 @@ final class AddressBarButton: UIButton {
             }
             
             if #available(iOS 14.0, *),
-               let pendingMenuAfterDismissal {
+               let pendingMenuAfterDismissal = pendingMenuAfterDismissal as? UIMenu {
                 self.menu = pendingMenuAfterDismissal
                 self.pendingMenuAfterDismissal = nil
             }

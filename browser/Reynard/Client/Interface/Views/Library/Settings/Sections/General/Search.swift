@@ -9,7 +9,7 @@ import UIKit
 
 final class SearchPreferencesViewController: SettingsTableViewController {
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Search"
     }
     
@@ -30,7 +30,7 @@ final class SearchPreferencesViewController: SettingsTableViewController {
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
         cell.textLabel?.text = "Search Engine"
         cell.detailTextLabel?.text = Prefs.SearchSettings.searchEngine.displayName
-        cell.detailTextLabel?.textColor = .secondaryLabel
+        cell.detailTextLabel?.textColor = .reynardSecondaryLabel
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -69,7 +69,7 @@ final class SettingsTextFieldCell: UITableViewCell {
 
 final class SearchEnginePreferencesViewController: SettingsTableViewController, UITextFieldDelegate {
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Search Engine"
     }
     

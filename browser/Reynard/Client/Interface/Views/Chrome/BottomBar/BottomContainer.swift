@@ -11,14 +11,14 @@ final class BottomContainer {
     let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         return view
     }()
     
     let bottomSafeAreaFillView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         return view
     }()
     

@@ -104,7 +104,7 @@ final class BrowserSplitViewController: UISplitViewController, UISplitViewContro
     
     private lazy var libraryNavigationController: UINavigationController = {
         let navigationController = UINavigationController(rootViewController: libraryViewController)
-        navigationController.navigationBar.tintColor = .label
+        navigationController.navigationBar.tintColor = .reynardLabel
         return navigationController
     }()
     
@@ -229,7 +229,7 @@ final class BrowserSplitViewController: UISplitViewController, UISplitViewContro
 }
 
 enum SidebarToggleButtonConfiguration {
-    private static let fallbackImage = UIImage(systemName: "sidebar.left")
+    private static let fallbackImage = UIImage.reynardSystemImage(named: "sidebar.left")
     
     static func configure(_ button: UIButton, in splitViewController: UISplitViewController?) {
         button.setImage(resolvedImage(in: splitViewController), for: .normal)

@@ -44,9 +44,9 @@ final class EditBookmarkViewController: UIViewController, UITableViewDataSource,
     private var bookmarkStoreObserver: NSObjectProtocol?
     
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        let tableView = UITableView(frame: .zero, style: .reynardInsetGrouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = .reynardSystemGroupedBackground
         tableView.dataSource = self
         tableView.delegate = self
         tableView.separatorStyle = .singleLine
@@ -57,24 +57,24 @@ final class EditBookmarkViewController: UIViewController, UITableViewDataSource,
     }()
     
     private let bookmarkFaviconTopView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "globe"))
+        let imageView = UIImageView(image: UIImage.reynardSystemImage(named: "globe"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .secondaryLabel
-        imageView.backgroundColor = .secondarySystemGroupedBackground
+        imageView.tintColor = .reynardSecondaryLabel
+        imageView.backgroundColor = .reynardSecondarySystemGroupedBackground
         imageView.layer.cornerRadius = 12
-        imageView.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { imageView.layer.cornerCurve = .continuous }
         imageView.clipsToBounds = true
         return imageView
     }()
     private let bookmarkFaviconBottomView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "globe"))
+        let imageView = UIImageView(image: UIImage.reynardSystemImage(named: "globe"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .secondaryLabel
-        imageView.backgroundColor = .secondarySystemGroupedBackground
+        imageView.tintColor = .reynardSecondaryLabel
+        imageView.backgroundColor = .reynardSecondarySystemGroupedBackground
         imageView.layer.cornerRadius = 12
-        imageView.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { imageView.layer.cornerCurve = .continuous }
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -142,18 +142,18 @@ final class EditBookmarkViewController: UIViewController, UITableViewDataSource,
         super.viewDidLoad()
         
         title = showsFavoritesHierarchyOnly ? "Add to Favorites" : (bookmark == nil ? "Add Bookmark" : "Edit Bookmark")
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         
         if #available(iOS 26.0, *), MakeButtons.hasLiquidGlass {
             navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(saveBookmark))
-            navigationItem.rightBarButtonItem?.tintColor = .label
+            navigationItem.rightBarButtonItem?.tintColor = .reynardLabel
             if bookmark != nil {
                 navigationItem.leftBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(deleteBookmark))]
                 navigationItem.leftBarButtonItems?.first?.tintColor = .systemRed
             } else {
                 navigationItem.leftBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))]
-                navigationItem.leftBarButtonItems?.first?.tintColor = .label
+                navigationItem.leftBarButtonItems?.first?.tintColor = .reynardLabel
             }
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveBookmark))
@@ -226,7 +226,7 @@ final class EditBookmarkViewController: UIViewController, UITableViewDataSource,
         if indexPath.section == 0 {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
-            cell.backgroundColor = .secondarySystemGroupedBackground
+            cell.backgroundColor = .reynardSecondarySystemGroupedBackground
             cell.clipsToBounds = true
             cell.contentView.clipsToBounds = true
             
@@ -266,11 +266,11 @@ final class EditBookmarkViewController: UIViewController, UITableViewDataSource,
         
         if indexPath.section == 1 {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-            cell.backgroundColor = .secondarySystemGroupedBackground
+            cell.backgroundColor = .reynardSecondarySystemGroupedBackground
             cell.tintColor = .systemBlue
             cell.textLabel?.text = "New Folder"
             cell.textLabel?.textColor = .systemBlue
-            cell.imageView?.image = UIImage(systemName: "folder.badge.plus")?.withRenderingMode(.alwaysTemplate)
+            cell.imageView?.image = UIImage.reynardSystemImage(named: "folder.badge.plus")?.withRenderingMode(.alwaysTemplate)
             return cell
         }
         
@@ -361,9 +361,9 @@ final class NewBookmarkFolderViewController: UIViewController, UITableViewDataSo
     private var selectedParentFolderGUID: String?
     
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        let tableView = UITableView(frame: .zero, style: .reynardInsetGrouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = .reynardSystemGroupedBackground
         tableView.dataSource = self
         tableView.delegate = self
         tableView.separatorStyle = .singleLine
@@ -401,14 +401,14 @@ final class NewBookmarkFolderViewController: UIViewController, UITableViewDataSo
         super.viewDidLoad()
         
         title = "New Folder"
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         
         if #available(iOS 26.0, *), MakeButtons.hasLiquidGlass {
             navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
-            navigationItem.leftBarButtonItem?.tintColor = .label
+            navigationItem.leftBarButtonItem?.tintColor = .reynardLabel
             navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(createFolder))
-            navigationItem.rightBarButtonItem?.tintColor = .label
+            navigationItem.rightBarButtonItem?.tintColor = .reynardLabel
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(createFolder))
         }
@@ -446,7 +446,7 @@ final class NewBookmarkFolderViewController: UIViewController, UITableViewDataSo
         if indexPath.section == 0 {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
-            cell.backgroundColor = .secondarySystemGroupedBackground
+            cell.backgroundColor = .reynardSecondarySystemGroupedBackground
             cell.contentView.addSubview(folderTitleField)
             
             NSLayoutConstraint.activate([
@@ -517,14 +517,14 @@ private final class BookmarkOperationFolderCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.adjustsFontForContentSizeCategory = true
         return label
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .secondarySystemGroupedBackground
+        backgroundColor = .reynardSecondarySystemGroupedBackground
         tintColor = .systemBlue
         
         contentView.addSubview(folderIconView)
@@ -566,14 +566,14 @@ private final class BookmarkOperationFolderCell: UITableViewCell {
         currentDepth = depth
         folderTitleLabel.text = folder.title
         iconLeadingConstraint?.constant = CGFloat(depth) * hierarchyIndentWidth
-        folderIconView.tintColor = isSelected ? .systemBlue : .secondaryLabel
+        folderIconView.tintColor = isSelected ? .systemBlue : .reynardSecondaryLabel
         
         if folder.parentGUID == nil {
-            folderIconView.image = UIImage(systemName: "book")?.withRenderingMode(.alwaysTemplate)
+            folderIconView.image = UIImage.reynardSystemImage(named: "book")?.withRenderingMode(.alwaysTemplate)
         } else if folder.isProtected && folder.title == "Favorites" {
-            folderIconView.image = UIImage(systemName: "star")?.withRenderingMode(.alwaysTemplate)
+            folderIconView.image = UIImage.reynardSystemImage(named: "star")?.withRenderingMode(.alwaysTemplate)
         } else {
-            folderIconView.image = UIImage(systemName: "folder")?.withRenderingMode(.alwaysTemplate)
+            folderIconView.image = UIImage.reynardSystemImage(named: "folder")?.withRenderingMode(.alwaysTemplate)
         }
     }
 }

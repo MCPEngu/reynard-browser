@@ -107,9 +107,9 @@ private final class HistoryManagerViewController: UIViewController, UITableViewD
     }()
     
     private lazy var tableView: UITableView = {
-        let view = UITableView(frame: .zero, style: .insetGrouped)
+        let view = UITableView(frame: .zero, style: .reynardInsetGrouped)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         view.dataSource = self
         view.delegate = self
         view.rowHeight = UITableView.automaticDimension
@@ -140,7 +140,7 @@ private final class HistoryManagerViewController: UIViewController, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -215,9 +215,9 @@ private final class HistoryManagerViewController: UIViewController, UITableViewD
             constraints.append(contentsOf: [
                 searchBar.trailingAnchor.constraint(equalTo: clearHistoryButton.leadingAnchor),
                 clearHistoryButton.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor, constant: -20),
-                clearHistoryButton.centerYAnchor.constraint(equalTo: searchBar.searchTextField.centerYAnchor),
+                clearHistoryButton.centerYAnchor.constraint(equalTo: searchBar.reynardTextField.centerYAnchor),
                 clearHistoryButton.widthAnchor.constraint(equalTo: clearHistoryButton.heightAnchor),
-                clearHistoryButton.heightAnchor.constraint(equalTo: searchBar.searchTextField.heightAnchor),
+                clearHistoryButton.heightAnchor.constraint(equalTo: searchBar.reynardTextField.heightAnchor),
             ])
         }
         
@@ -284,7 +284,7 @@ private final class HistoryManagerViewController: UIViewController, UITableViewD
             return
         }
         
-        clearHistoryBarButtonItem.tintColor = .label
+        clearHistoryBarButtonItem.tintColor = .reynardLabel
         MakeButtons.installLibraryActionBarButton(clearHistoryBarButtonItem, in: navigationItem)
     }
     
@@ -654,12 +654,12 @@ private final class HistoryManagerViewController: UIViewController, UITableViewD
         }
         
         let container = UIView()
-        container.backgroundColor = .systemGroupedBackground
+        container.backgroundColor = .reynardSystemGroupedBackground
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = sections[section].title
         
         container.addSubview(label)

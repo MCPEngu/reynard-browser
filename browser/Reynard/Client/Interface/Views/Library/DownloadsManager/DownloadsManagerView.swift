@@ -39,10 +39,10 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
         imageName: "ellipsis",
         action: #selector(downloadsActionsButtonTapped)
     )
-    private var legacyDownloadsActionsMenuDelegate: LegacyDownloadsActionsMenuDelegate?
+    private var legacyDownloadsActionsMenuDelegate: Any?
     private lazy var downloadsActionsBarButtonItem: UIBarButtonItem = {
         let item = UIBarButtonItem(
-            image: UIImage(systemName: "ellipsis"),
+            image: UIImage.reynardSystemImage(named: "ellipsis"),
             style: .plain,
             target: self,
             action: #selector(downloadsActionsButtonTapped)
@@ -59,9 +59,9 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
     }
     
     private lazy var tableView: UITableView = {
-        let view = UITableView(frame: .zero, style: .insetGrouped)
+        let view = UITableView(frame: .zero, style: .reynardInsetGrouped)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         view.dataSource = self
         view.delegate = self
         view.rowHeight = UITableView.automaticDimension
@@ -85,7 +85,7 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
         super.init(frame: frame)
         
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .systemGroupedBackground
+        backgroundColor = .reynardSystemGroupedBackground
         addSubview(tableView)
         setupHeaderView()
         
@@ -207,9 +207,9 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
             constraints.append(contentsOf: [
                 searchBar.trailingAnchor.constraint(equalTo: downloadsActionsButton.leadingAnchor),
                 downloadsActionsButton.trailingAnchor.constraint(equalTo: headerContainerView.trailingAnchor, constant: -20),
-                downloadsActionsButton.centerYAnchor.constraint(equalTo: searchBar.searchTextField.centerYAnchor),
+                downloadsActionsButton.centerYAnchor.constraint(equalTo: searchBar.reynardTextField.centerYAnchor),
                 downloadsActionsButton.widthAnchor.constraint(equalTo: downloadsActionsButton.heightAnchor),
-                downloadsActionsButton.heightAnchor.constraint(equalTo: searchBar.searchTextField.heightAnchor),
+                downloadsActionsButton.heightAnchor.constraint(equalTo: searchBar.reynardTextField.heightAnchor),
             ])
         }
         
@@ -261,9 +261,10 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
         _ = interaction.perform(selector, with: center)
     }
     
+    @available(iOS 13.0, *)
     fileprivate func makeDownloadsActionsMenu() -> UIMenu {
         UIMenu(title: "", children: [
-            UIAction(title: "Open Downloads Folder", image: UIImage(systemName: "folder")) { [weak self] _ in
+            UIAction(title: "Open Downloads Folder", image: UIImage.reynardSystemImage(named: "folder")) { [weak self] _ in
                 self?.openDownloadsFolder()
             },
             UIAction(title: "Clear Downloads History", image: UIImage(named: "arrow.down.circle.badge.xmark")) { [weak self] _ in
@@ -305,7 +306,7 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
             return
         }
         
-        downloadsActionsBarButtonItem.tintColor = .label
+        downloadsActionsBarButtonItem.tintColor = .reynardLabel
         if #available(iOS 14.0, *) {
             downloadsActionsBarButtonItem.menu = makeDownloadsActionsMenu()
             downloadsActionsBarButtonItem.target = nil
@@ -538,12 +539,12 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let container = UIView()
-        container.backgroundColor = .systemGroupedBackground
+        container.backgroundColor = .reynardSystemGroupedBackground
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = sections[section].title
         
         container.addSubview(label)
@@ -722,6 +723,7 @@ final class DownloadsManagerView: UIView, UITableViewDataSource, UITableViewDele
     }
 }
 
+@available(iOS 13.0, *)
 private final class LegacyDownloadsActionsMenuDelegate: NSObject, UIContextMenuInteractionDelegate {
     weak var owner: DownloadsManagerView?
     

@@ -28,28 +28,28 @@ enum LinkPreviewMenu {
         } actionProvider: { _ in
             let openInNewTabAction = UIAction(
                 title: "Open in New Tab",
-                image: UIImage(systemName: "plus")
+                image: UIImage.reynardSystemImage(named: "plus")
             ) { _ in
                 openInNewTab()
             }
             
             let openInNewPrivateTabAction = UIAction(
                 title: "Open in New Private Tab",
-                image: UIImage(systemName: "sunglasses")
+                image: UIImage.reynardSystemImage(named: "sunglasses")
             ) { _ in
                 openInNewPrivateTab()
             }
             
             let copyLinkAction = UIAction(
                 title: "Copy Link",
-                image: UIImage(systemName: "document.on.document")
+                image: UIImage.reynardSystemImage(named: "document.on.document")
             ) { _ in
                 UIPasteboard.general.string = url.absoluteString
             }
             
             let shareLinkAction = UIAction(
                 title: "Share Link",
-                image: UIImage(systemName: "square.and.arrow.up")
+                image: UIImage.reynardSystemImage(named: "square.and.arrow.up")
             ) { _ in
                 shareLink(url)
             }
@@ -85,7 +85,7 @@ final class LinkPreviewViewController: UIViewController, ContentDelegate, Naviga
     }
     
     override func loadView() {
-        geckoView.backgroundColor = .systemBackground
+        geckoView.backgroundColor = .reynardSystemBackground
         geckoView.isUserInteractionEnabled = false
         view = geckoView
     }

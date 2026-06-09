@@ -51,7 +51,7 @@ final class AddressBar: UIView {
     private var isLoading = false
     private var forceComposingAppearanceWhenUnfocused = false
     private var preservesAutocompleteWhenUnfocused = false
-    private var addonsMenu: UIMenu?
+    private var addonsMenu: Any?
     private var lastEditingText = ""
     private var lastEditWasDelete = false
     private var showsFocusPreview = false
@@ -69,10 +69,8 @@ final class AddressBar: UIView {
     private let backgroundFillView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor { traitCollection in
-            traitCollection.userInterfaceStyle == .dark ? .tertiarySystemBackground : .systemBackground
-        }
-        view.layer.cornerCurve = .continuous
+        view.backgroundColor = .reynardChromeBackground
+        if #available(iOS 13.0, *) { view.layer.cornerCurve = .continuous }
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
         return view
@@ -81,7 +79,7 @@ final class AddressBar: UIView {
     private let leadingButton: AddressBarButton = {
         let button = AddressBarButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .secondaryLabel
+        button.tintColor = .reynardSecondaryLabel
         if #available(iOS 14.0, *) {
             button.showsMenuAsPrimaryAction = true
         }
@@ -92,7 +90,7 @@ final class AddressBar: UIView {
     private let trailingButton: AddressBarButton = {
         let button = AddressBarButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .label
+        button.tintColor = .reynardLabel
         button.isHidden = true
         button.isUserInteractionEnabled = false
         return button
@@ -117,7 +115,7 @@ final class AddressBar: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .left
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.font = .systemFont(ofSize: 17)
         label.lineBreakMode = .byTruncatingTail
         label.numberOfLines = 1
@@ -129,7 +127,7 @@ final class AddressBar: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .left
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.font = .systemFont(ofSize: 17)
         label.lineBreakMode = .byTruncatingTail
         label.numberOfLines = 1
@@ -148,7 +146,7 @@ final class AddressBar: UIView {
     private let progressView: UIProgressView = {
         let view = UIProgressView(progressViewStyle: .default)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.progressTintColor = .label
+        view.progressTintColor = .reynardLabel
         view.trackTintColor = .clear
         view.isHidden = true
         return view
@@ -157,9 +155,9 @@ final class AddressBar: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
-        layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { layer.cornerCurve = .continuous }
         layer.cornerRadius = 16
-        layer.shadowColor = traitCollection.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.3).cgColor : UIColor.black.cgColor
+        layer.shadowColor = UIColor.reynardChromeShadow.cgColor
         layer.shadowOpacity = 0.12
         layer.shadowRadius = 10
         layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -194,7 +192,7 @@ final class AddressBar: UIView {
         updateDisplayState()
     }
     
-    func setAddonsMenu(_ menu: UIMenu?) {
+    func setAddonsMenu(_ menu: Any?) {
         addonsMenu = menu
         updateDisplayState()
     }
@@ -438,14 +436,14 @@ final class AddressBar: UIView {
         
         leadingButton.isHidden = false
         if leadingButtonShowsSearchIcon {
-            leadingButton.tintColor = .secondaryLabel
+            leadingButton.tintColor = .reynardSecondaryLabel
             leadingButton.setImage(symbolImage(primary: "magnifyingglass", fallback: "magnifyingglass.circle"), for: .normal)
             leadingButton.setMenuPreservingPresentation(nil)
             leadingButton.isUserInteractionEnabled = false
             return
         }
         
-        leadingButton.tintColor = leadingButtonShowsMenu ? .label : .secondaryLabel
+        leadingButton.tintColor = leadingButtonShowsMenu ? .reynardLabel : .reynardSecondaryLabel
         leadingButton.setImage(symbolImage(primary: "list.bullet.below.rectangle", fallback: "line.horizontal.3"), for: .normal)
         leadingButton.setMenuPreservingPresentation(leadingButtonShowsMenu ? addonsMenu : nil)
         leadingButton.isUserInteractionEnabled = leadingButtonShowsMenu && addonsMenu != nil
@@ -457,7 +455,7 @@ final class AddressBar: UIView {
         guard trailingButtonVisible else {
             return
         }
-        trailingButton.setImage(UIImage(systemName: isLoading ? "xmark" : "arrow.clockwise"), for: .normal)
+        trailingButton.setImage(UIImage.reynardSystemImage(named: isLoading ? "xmark" : "arrow.clockwise"), for: .normal)
     }
     
     private func displayAttributedText() -> NSAttributedString? {
@@ -469,18 +467,18 @@ final class AddressBar: UIView {
               let host = locationHost() else {
             return NSAttributedString(
                 string: currentText,
-                attributes: [.foregroundColor: UIColor.label]
+                attributes: [.foregroundColor: UIColor.reynardLabel]
             )
         }
         
         let attributedText = NSMutableAttributedString(
             string: host,
-            attributes: [.foregroundColor: UIColor.label]
+            attributes: [.foregroundColor: UIColor.reynardLabel]
         )
         attributedText.append(
             NSAttributedString(
                 string: " / ",
-                attributes: [.foregroundColor: UIColor.secondaryLabel]
+                attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
             )
         )
         if let title = currentLocationTitle,
@@ -488,7 +486,7 @@ final class AddressBar: UIView {
             attributedText.append(
                 NSAttributedString(
                     string: title,
-                    attributes: [.foregroundColor: UIColor.secondaryLabel]
+                    attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
                 )
             )
         }
@@ -558,10 +556,10 @@ final class AddressBar: UIView {
     }
     
     private func symbolImage(primary: String, fallback: String) -> UIImage? {
-        if let image = UIImage(systemName: primary) {
+        if let image = UIImage.reynardSystemImage(named: primary) {
             return image
         }
-        return UIImage(systemName: fallback)
+        return UIImage.reynardSystemImage(named: fallback)
     }
     
     private func commitAutocompleteForEditing() {
@@ -581,8 +579,8 @@ final class AddressBar: UIView {
         let attributedText = NSAttributedString(
             string: text,
             attributes: [
-                .foregroundColor: UIColor.label,
-                .backgroundColor: UIColor.systemGray4
+                .foregroundColor: UIColor.reynardLabel,
+                .backgroundColor: UIColor.reynardSystemGray4
             ]
         )
         autocompleteLabel.attributedText = attributedText
@@ -602,7 +600,7 @@ final class AddressBar: UIView {
     
     private func updateOverlayState() {
         urlField.isAutocompleteActive = isShowingOverlay
-        urlField.textColor = isShowingOverlay ? .clear : .label
+        urlField.textColor = isShowingOverlay ? .clear : .reynardLabel
         urlField.tintColor = isShowingOverlay ? .clear : tintColor
         overlayButton.isHidden = !isShowingOverlay
     }

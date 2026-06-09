@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import UniformTypeIdentifiers
 import MobileCoreServices
 
 extension SettingsRootViewController: UIDocumentPickerDelegate {
@@ -47,7 +46,7 @@ extension SettingsRootViewController {
         detailLabel.numberOfLines = 0
         detailLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
         detailLabel.adjustsFontForContentSizeCategory = true
-        detailLabel.textColor = .secondaryLabel
+        detailLabel.textColor = .reynardSecondaryLabel
         detailLabel.text = "Enabling JIT improves performance significantly and is required for features like WebAssembly."
         stack.addArrangedSubview(detailLabel)
         
@@ -76,13 +75,7 @@ extension SettingsRootViewController {
     }
     
     func presentPairingFilePicker() {
-        let picker: UIDocumentPickerViewController
-        if #available(iOS 14.0, *) {
-            let types = allowedPairingFileTypes()
-            picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
-        } else {
-            picker = UIDocumentPickerViewController(documentTypes: allowedPairingDocumentTypeIdentifiers(), in: .import)
-        }
+        let picker = UIDocumentPickerViewController(documentTypes: allowedPairingDocumentTypeIdentifiers(), in: .import)
         picker.delegate = self
         picker.allowsMultipleSelection = false
         present(picker, animated: true)
@@ -214,17 +207,6 @@ extension SettingsRootViewController {
         })
         present(alert, animated: true)
     }
-}
-
-@available(iOS 14.0, *)
-func allowedPairingFileTypes() -> [UTType] {
-    var types = [UTType.propertyList]
-    ["mobiledevicepairing", "mobiledevicepair", "plist"].forEach { ext in
-        if let type = UTType(filenameExtension: ext), !types.contains(type) {
-            types.append(type)
-        }
-    }
-    return types
 }
 
 func allowedPairingDocumentTypeIdentifiers() -> [String] {

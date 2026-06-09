@@ -68,7 +68,7 @@ final class SettingsRootViewController: SettingsTableViewController {
     var updateProgressObservation: NSKeyValueObservation?
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Settings"
     }
     
@@ -135,7 +135,7 @@ final class SettingsRootViewController: SettingsTableViewController {
             // if on 16.6 to 17.3.1, disable the cell.
             if #available(iOS 16.6, *) {
                 if #unavailable(iOS 17.4) {
-                    cell.textLabel?.textColor = .secondaryLabel
+                    cell.textLabel?.textColor = .reynardSecondaryLabel
                     cell.selectionStyle = .none
                     cell.isUserInteractionEnabled = false
                 }
@@ -154,14 +154,14 @@ final class SettingsRootViewController: SettingsTableViewController {
                 let build = info?["CFBundleVersion"] as? String ?? "Unknown"
                 cell.textLabel?.text = "Reynard Browser"
                 cell.detailTextLabel?.text = "\(version) (\(build))"
-                cell.detailTextLabel?.textColor = .secondaryLabel
+                cell.detailTextLabel?.textColor = .reynardSecondaryLabel
                 cell.selectionStyle = .none
                 cell.accessoryType = .none
                 return cell
             case 1:
                 cell.textLabel?.text = "Engine Version"
                 cell.detailTextLabel?.text = GeckoRuntime.version
-                cell.detailTextLabel?.textColor = .secondaryLabel
+                cell.detailTextLabel?.textColor = .reynardSecondaryLabel
                 cell.selectionStyle = .none
                 cell.accessoryType = .none
                 return cell

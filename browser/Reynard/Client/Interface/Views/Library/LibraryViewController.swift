@@ -53,11 +53,10 @@ enum LibrarySection: Int, CaseIterable {
     }
     
     var tabBarItem: UITabBarItem {
-        let configuration = UIImage.SymbolConfiguration(pointSize: 18, weight: .regular)
         let item = UITabBarItem(
             title: title,
-            image: UIImage(systemName: symbolName, withConfiguration: configuration),
-            selectedImage: UIImage(systemName: selectedSymbolName, withConfiguration: configuration)
+            image: UIImage.reynardSystemImage(named: symbolName, pointSize: 18),
+            selectedImage: UIImage.reynardSystemImage(named: selectedSymbolName, pointSize: 18)
         )
         item.tag = rawValue
         return item
@@ -66,25 +65,31 @@ enum LibrarySection: Int, CaseIterable {
 
 private enum LibraryTabBarStyle {
     static func apply(to tabBar: UITabBar) {
+        tabBar.tintColor = .reynardLabel
+        tabBar.unselectedItemTintColor = .reynardSecondaryLabel
+        tabBar.barTintColor = .reynardSystemBackground
+
+        guard #available(iOS 13.0, *) else {
+            return
+        }
+
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .systemBackground
+        appearance.backgroundColor = .reynardSystemBackground
         
         let titleAttributes: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10, weight: .regular)]
         
         [appearance.stackedLayoutAppearance, appearance.inlineLayoutAppearance, appearance.compactInlineLayoutAppearance].forEach { itemAppearance in
-            itemAppearance.normal.iconColor = .secondaryLabel
-            itemAppearance.normal.titleTextAttributes = titleAttributes.merging([.foregroundColor: UIColor.secondaryLabel]) { _, new in new }
-            itemAppearance.selected.iconColor = .label
-            itemAppearance.selected.titleTextAttributes = titleAttributes.merging([.foregroundColor: UIColor.label]) { _, new in new }
+            itemAppearance.normal.iconColor = .reynardSecondaryLabel
+            itemAppearance.normal.titleTextAttributes = titleAttributes.merging([.foregroundColor: UIColor.reynardSecondaryLabel]) { _, new in new }
+            itemAppearance.selected.iconColor = .reynardLabel
+            itemAppearance.selected.titleTextAttributes = titleAttributes.merging([.foregroundColor: UIColor.reynardLabel]) { _, new in new }
         }
         
         tabBar.standardAppearance = appearance
         if #available(iOS 15.0, *) {
             tabBar.scrollEdgeAppearance = appearance
         }
-        tabBar.tintColor = .label
-        tabBar.unselectedItemTintColor = .secondaryLabel
     }
 }
 
@@ -109,7 +114,7 @@ final class LibraryViewController: UITabBarController, UITabBarControllerDelegat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         delegate = self
         setViewControllers(makeSectionViewControllers(), animated: false)
         let selectedSection = visibleSections.contains(initialSection) ? initialSection : .bookmarks
@@ -220,7 +225,7 @@ final class LibraryViewController: UITabBarController, UITabBarControllerDelegat
                 target: self,
                 action: #selector(dismissLibraryMenu)
             )
-            button.tintColor = .label
+            button.tintColor = .reynardLabel
             return button
         }
         
@@ -247,7 +252,7 @@ private final class LibraryHostedSectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         
         let hostedView = hostedViewFactory()
         

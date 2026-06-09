@@ -65,12 +65,11 @@ final class JITFailureView: UIView {
     }
     
     private func configureView() {
-        backgroundColor = .systemBackground
+        backgroundColor = .reynardSystemBackground
         let horizontalInset: CGFloat = 24
         
-        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 96, weight: .regular)
-        symbolImageView.image = UIImage(systemName: "bolt.slash", withConfiguration: symbolConfiguration)
-        symbolImageView.tintColor = .label
+        symbolImageView.image = UIImage.reynardSystemImage(named: "bolt.slash", pointSize: 96)
+        symbolImageView.tintColor = .reynardLabel
         symbolImageView.contentMode = .scaleAspectFit
         symbolImageView.setContentHuggingPriority(.required, for: .vertical)
         symbolImageView.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -86,13 +85,13 @@ final class JITFailureView: UIView {
         messageLabel.text = nil
         messageLabel.textAlignment = .center
         messageLabel.font = .preferredFont(forTextStyle: .body)
-        messageLabel.textColor = .secondaryLabel
+        messageLabel.textColor = .reynardSecondaryLabel
         messageLabel.adjustsFontForContentSizeCategory = true
         messageLabel.numberOfLines = 0
         
-        errorContainerView.backgroundColor = .secondarySystemBackground
+        errorContainerView.backgroundColor = .reynardSecondarySystemBackground
         errorContainerView.layer.cornerRadius = 12
-        errorContainerView.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { errorContainerView.layer.cornerCurve = .continuous }
         errorContainerView.translatesAutoresizingMaskIntoConstraints = false
         
         errorScrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -104,7 +103,7 @@ final class JITFailureView: UIView {
         errorLabel.textAlignment = .left
         errorLabel.numberOfLines = 1
         errorLabel.lineBreakMode = .byClipping
-        errorLabel.textColor = .label
+        errorLabel.textColor = .reynardLabel
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
         errorLabel.adjustsFontForContentSizeCategory = true
         errorLabel.font = .monospacedSystemFont(
@@ -115,10 +114,10 @@ final class JITFailureView: UIView {
         quitButton.setTitle(nil, for: .normal)
         quitButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
         quitButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        quitButton.backgroundColor = .label
-        quitButton.setTitleColor(.systemBackground, for: .normal)
+        quitButton.backgroundColor = .reynardLabel
+        quitButton.setTitleColor(.reynardSystemBackground, for: .normal)
         quitButton.layer.cornerRadius = 12
-        quitButton.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { quitButton.layer.cornerCurve = .continuous }
         quitButton.contentEdgeInsets = UIEdgeInsets(top: 14, left: 20, bottom: 14, right: 20)
         quitButton.accessibilityTraits.insert(.button)
         
@@ -250,7 +249,9 @@ final class JITFailureViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        isModalInPresentation = true
+        if #available(iOS 13.0, *) {
+            isModalInPresentation = true
+        }
         contentView.updateContent(title: titleText, message: messageText, buttonTitle: actionButtonTitle)
         contentView.updateError(code: errorCode, description: errorDescriptionText)
         contentView.setErrorDetailsHidden(!showsErrorDetails)

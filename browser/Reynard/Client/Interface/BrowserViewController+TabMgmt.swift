@@ -167,6 +167,10 @@ extension BrowserViewController: TabManagerDelegate {
             return
         }
         
+        guard #available(iOS 13.0, *) else {
+            return
+        }
+        
         if element.type == .image,
            let source = element.srcUri?.trimmingCharacters(in: .whitespacesAndNewlines),
            let url = URL(string: source) {

@@ -33,6 +33,7 @@ private enum ContextMenuAssociatedKeys {
     static var haptic = 0
 }
 
+@available(iOS 13.0, *)
 extension BrowserViewController: UIContextMenuInteractionDelegate {
     var pendingContextMenuContext: ContextMenuContext? {
         get {

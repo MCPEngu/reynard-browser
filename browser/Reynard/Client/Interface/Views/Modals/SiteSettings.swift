@@ -117,7 +117,7 @@ final class SiteSettingsViewController: UITableViewController {
         self.origin = origin
         self.session = session
         self.store = store
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Settings for \(host)"
     }
     
@@ -128,7 +128,7 @@ final class SiteSettingsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         
         navigationItem.rightBarButtonItems = [siteSettingsDismissButton(target: self, action: #selector(dismissModal))]
@@ -190,7 +190,7 @@ final class SiteSettingsViewController: UITableViewController {
             if indexPath.row == 0 {
                 let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
                 cell.textLabel?.text = disabledPermissionsDescription()
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 cell.textLabel?.numberOfLines = 0
                 cell.selectionStyle = .none
                 return cell
@@ -212,7 +212,7 @@ final class SiteSettingsViewController: UITableViewController {
             } else {
                 cell.detailTextLabel?.text = nil
             }
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryView = nil
             cell.accessoryType = .none
             cell.selectionStyle = .default
@@ -228,9 +228,9 @@ final class SiteSettingsViewController: UITableViewController {
         
         cell.textLabel?.text = row.title
         if isPermissionDisabled(row.permission) {
-            cell.textLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardSecondaryLabel
             cell.detailTextLabel?.text = options(for: row)[selectedIndex(for: row)]
-            cell.detailTextLabel?.textColor = .tertiaryLabel
+            cell.detailTextLabel?.textColor = .reynardTertiaryLabel
             cell.selectionStyle = .none
             cell.isUserInteractionEnabled = false
             cell.accessoryView = nil
@@ -238,7 +238,7 @@ final class SiteSettingsViewController: UITableViewController {
             return cell
         }
         
-        cell.textLabel?.textColor = .label
+        cell.textLabel?.textColor = .reynardLabel
         cell.selectionStyle = .default
         cell.isUserInteractionEnabled = true
         
@@ -305,7 +305,7 @@ final class SiteSettingsViewController: UITableViewController {
     private func popupButton(for row: Row) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(options(for: row)[selectedIndex(for: row)], for: .normal)
-        button.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
+        button.setImage(UIImage.reynardSystemImage(named: "chevron.up.chevron.down"), for: .normal)
         button.semanticContentAttribute = .forceRightToLeft
         button.contentHorizontalAlignment = .trailing
         button.showsMenuAsPrimaryAction = true
@@ -562,7 +562,7 @@ private final class SitePermissionOptionsViewController: UITableViewController {
         self.optionTitles = options
         self.selectedIndex = selectedIndex
         self.onSelect = onSelect
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         self.title = title
     }
     
@@ -573,7 +573,7 @@ private final class SitePermissionOptionsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         navigationItem.rightBarButtonItems = [siteSettingsDismissButton(target: self, action: #selector(dismissModal))]
     }
@@ -614,7 +614,7 @@ private func siteSettingsDismissButton(target: Any?, action: Selector) -> UIBarB
     let button: UIBarButtonItem
     if #available(iOS 26.0, *), MakeButtons.hasLiquidGlass {
         button = UIBarButtonItem(barButtonSystemItem: .cancel, target: target, action: action)
-        button.tintColor = .label
+        button.tintColor = .reynardLabel
     } else {
         button = UIBarButtonItem(barButtonSystemItem: .done, target: target, action: action)
     }

@@ -175,7 +175,7 @@ private final class DateTimePickerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .reynardSystemBackground
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(datePicker)
         NSLayoutConstraint.activate([

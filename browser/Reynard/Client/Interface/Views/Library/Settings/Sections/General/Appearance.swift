@@ -31,8 +31,12 @@ final class PositionOptionControl: UIControl {
         radioView.translatesAutoresizingMaskIntoConstraints = false
         radioView.contentMode = .scaleAspectFit
         
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 78, weight: .ultraLight)
-        imageView.image = UIImage(named: symbolName)?.applyingSymbolConfiguration(symbolConfig)
+        if #available(iOS 13.0, *) {
+            let symbolConfig = UIImage.SymbolConfiguration(pointSize: 78, weight: .ultraLight)
+            imageView.image = UIImage(named: symbolName)?.applyingSymbolConfiguration(symbolConfig)
+        } else {
+            imageView.image = UIImage(named: symbolName)
+        }
         
         addSubview(imageView)
         addSubview(titleLabel)
@@ -63,13 +67,12 @@ final class PositionOptionControl: UIControl {
     
     func updateAppearance(selected: Bool) {
         let accent = tintColor ?? .systemBlue
-        let secondary = UIColor.secondaryLabel
+        let secondary = UIColor.reynardSecondaryLabel
         imageView.tintColor = selected ? accent : secondary
-        titleLabel.textColor = .label
-        let radioConfig = UIImage.SymbolConfiguration(pointSize: 22, weight: .regular)
-        radioView.image = UIImage(
-            systemName: selected ? "checkmark.circle.fill" : "circle",
-            withConfiguration: radioConfig
+        titleLabel.textColor = .reynardLabel
+        radioView.image = UIImage.reynardSystemImage(
+            named: selected ? "checkmark.circle.fill" : "circle",
+            pointSize: 22
         )
         radioView.tintColor = selected ? accent : secondary
     }
@@ -140,7 +143,7 @@ final class AppearancePreferencesViewController: SettingsTableViewController {
     }
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Appearance"
     }
     

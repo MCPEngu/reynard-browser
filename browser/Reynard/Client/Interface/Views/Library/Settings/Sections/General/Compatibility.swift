@@ -20,7 +20,7 @@ final class CompatibilityPreferencesViewController: SettingsTableViewController 
     }
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Compatibility"
     }
     
@@ -123,7 +123,7 @@ final class UserAgentOverridesPreferencesViewController: UITableViewController {
     private var domains: [String] = []
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "User Agent Overrides"
     }
     

@@ -10,7 +10,6 @@ import GeckoView
 import UIKit
 import Darwin
 
-@available(iOS, introduced: 13.0, obsoleted: 14.0)
 private func configureUnsandboxedAppDataDirectories() {
     guard let cachesDirectory = FileManager.default.urls(
         for: .cachesDirectory,

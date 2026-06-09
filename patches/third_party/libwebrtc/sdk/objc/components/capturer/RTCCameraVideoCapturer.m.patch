@@ -7,7 +7,7 @@ index 60b1dbbfb5a2..3af58c86671c 100644
  const int64_t kNanosecondsPerSecond = 1000000000;
  
 +#if TARGET_OS_IPHONE
-+static UIWindowScene *RTCActiveWindowScene(void) {
++static UIWindowScene *RTCActiveWindowScene(void) API_AVAILABLE(ios(13.0)) {
 +  NSSet<UIScene *> *connectedScenes = UIApplication.sharedApplication.connectedScenes;
 +  for (UIScene *scene in connectedScenes) {
 +    if (![scene isKindOfClass:[UIWindowScene class]]) {
@@ -28,9 +28,11 @@ index 60b1dbbfb5a2..3af58c86671c 100644
 +}
 +
 +static UIInterfaceOrientation RTCCurrentAppOrientation(void) {
-+  UIWindowScene *windowScene = RTCActiveWindowScene();
-+  if (windowScene) {
-+    return windowScene.interfaceOrientation;
++  if (@available(iOS 13.0, *)) {
++    UIWindowScene *windowScene = RTCActiveWindowScene();
++    if (windowScene) {
++      return windowScene.interfaceOrientation;
++    }
 +  }
 +
 +#pragma clang diagnostic push

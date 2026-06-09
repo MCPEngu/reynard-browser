@@ -11,7 +11,7 @@ final class TopBar {
     let barView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         return view
     }()
     
@@ -25,7 +25,7 @@ final class TopBar {
     let safeAreaFillView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         return view
     }()
     

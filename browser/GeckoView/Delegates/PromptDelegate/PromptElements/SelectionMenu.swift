@@ -144,6 +144,7 @@ final class SelectPicker {
         return result
     }
     
+    @available(iOS 14.0, *)
     private func buildMenuElements(from items: [ChoiceItem]) -> [UIMenuElement] {
         var elements: [UIMenuElement] = []
         var pendingItems: [UIMenuElement] = []
@@ -334,7 +335,7 @@ private final class MultiSelectViewController: UIViewController,
             action: #selector(cancelTapped)
         )
         
-        tableView = UITableView(frame: view.bounds, style: .insetGrouped)
+        tableView = UITableView(frame: view.bounds, style: .reynardInsetGrouped)
         tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         tableView.dataSource = self
         tableView.delegate = self

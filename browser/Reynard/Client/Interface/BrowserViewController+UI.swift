@@ -96,6 +96,14 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
         UIDevice.current.userInterfaceIdiom == .pad
     }
     
+    func currentInterfaceOrientationForLayout() -> UIInterfaceOrientation? {
+        if #available(iOS 13.0, *) {
+            return view.window?.windowScene?.interfaceOrientation
+        }
+        
+        return UIApplication.shared.statusBarOrientation
+    }
+    
     var usesCompactPadChrome: Bool {
         if isPad && traitCollection.horizontalSizeClass == .compact { return true }
         return usesTopPhoneAddressBar
@@ -104,7 +112,7 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
     var usesPadChrome: Bool {
         if isPad { return true }
         if usesTopPhoneAddressBar { return true }
-        if let orientation = view.window?.windowScene?.interfaceOrientation {
+        if let orientation = currentInterfaceOrientationForLayout() {
             return orientation.isLandscape
         }
         return view.bounds.width > view.bounds.height
@@ -119,7 +127,7 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
             return true
         }
         
-        if let orientation = view.window?.windowScene?.interfaceOrientation {
+        if let orientation = currentInterfaceOrientationForLayout() {
             return orientation.isLandscape
         }
         
@@ -129,7 +137,7 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
     var usesTopPhoneAddressBar: Bool {
         guard !isPad else { return false }
         let isLandscape: Bool
-        if let orientation = view.window?.windowScene?.interfaceOrientation {
+        if let orientation = currentInterfaceOrientationForLayout() {
             isLandscape = orientation.isLandscape
         } else {
             isLandscape = view.bounds.width > view.bounds.height
@@ -217,7 +225,7 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
                 return 0
             }
             let isLandscape: Bool
-            if let orientation = view.window?.windowScene?.interfaceOrientation {
+            if let orientation = currentInterfaceOrientationForLayout() {
                 isLandscape = orientation.isLandscape
             } else {
                 isLandscape = view.bounds.width > view.bounds.height
@@ -297,16 +305,20 @@ extension BrowserViewController: AddressBarDelegate, BottomToolbarDelegate {
         }
         browserUI.addressBar.setLoadingProgress(selectedTab?.progress ?? 0, isLoading: selectedTab?.isLoading ?? false)
         addonController.prepareVisibleAddonIcons()
-        let addonItems = addonController.visibleMenuItemsForCurrentSite().map { item in
-            AddressBarMenu.AddonItem(menuItem: item, image: addonController.iconImage(for: item.addon))
-        }
-        browserUI.addressBar.setAddonsMenu(
-            AddressBarMenu.makeMenu(
-                selectedTab: selectedTab,
-                selectedURL: selectedURL,
-                addonItems: addonItems
+        if #available(iOS 13.0, *) {
+            let addonItems = addonController.visibleMenuItemsForCurrentSite().map { item in
+                AddressBarMenu.AddonItem(menuItem: item, image: addonController.iconImage(for: item.addon))
+            }
+            browserUI.addressBar.setAddonsMenu(
+                AddressBarMenu.makeMenu(
+                    selectedTab: selectedTab,
+                    selectedURL: selectedURL,
+                    addonItems: addonItems
+                )
             )
-        )
+        } else {
+            browserUI.addressBar.setAddonsMenu(nil)
+        }
     }
     func addressBarDidTapTrailingButton(_ addressBar: AddressBar) {
         guard let selectedTab = tabManager.selectedTab else {
@@ -679,7 +691,7 @@ final class BrowserUI {
             shouldShowGeckoBehindKeyboard: shouldShowGeckoBehindKeyboard
         )
         let isLandscape: Bool
-        if let orientation = controller.view.window?.windowScene?.interfaceOrientation {
+        if let orientation = controller.currentInterfaceOrientationForLayout() {
             isLandscape = orientation.isLandscape
         } else {
             isLandscape = controller.view.bounds.width > controller.view.bounds.height
@@ -729,8 +741,8 @@ final class BrowserUI {
         ui.bottomContainer.containerView.isHidden = (!showsCompactPadBottomToolbar && pad) || controller.tabOverviewPresentation.isVisible
         ui.bottomContainer.bottomSafeAreaFillView.isHidden = (!showsCompactPadBottomToolbar && pad) || controller.tabOverviewPresentation.isVisible
         ui.bottomContainerHeightConstraint.constant = compactPad ? 44 : (controller.isSearchFocused ? 58 : 94)
-        ui.bottomContainer.containerView.backgroundColor = controller.isSearchFocused && !pad ? .clear : .systemGray6
-        ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = controller.isSearchFocused && !pad ? .clear : .systemGray6
+        ui.bottomContainer.containerView.backgroundColor = controller.isSearchFocused && !pad ? .clear : .reynardSystemGray6
+        ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = controller.isSearchFocused && !pad ? .clear : .reynardSystemGray6
         ui.bottomToolbar.alpha = compactPad ? 1 : (controller.isSearchFocused ? 0 : 1)
         ui.bottomToolbar.setButtonsHidden(false)
         
@@ -795,8 +807,8 @@ final class BrowserUI {
                 ui.bottomContainer.bottomSafeAreaFillView.isHidden = true
             } else if !controller.usesDetachedSuggestions {
                 ui.bottomContainer.containerView.isHidden = false
-                ui.bottomContainer.containerView.backgroundColor = .systemGray6
-                ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = .systemGray6
+                ui.bottomContainer.containerView.backgroundColor = .reynardSystemGray6
+                ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = .reynardSystemGray6
                 ui.bottomContainer.bottomSafeAreaFillView.isHidden = false
             }
         }
@@ -835,8 +847,8 @@ final class BrowserUI {
         ui.bottomContainer.containerView.isHidden = true
         ui.bottomContainer.bottomSafeAreaFillView.isHidden = true
         ui.bottomContainerBottomConstraint.constant = 0
-        ui.bottomContainer.containerView.backgroundColor = .systemGray6
-        ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = .systemGray6
+        ui.bottomContainer.containerView.backgroundColor = .reynardSystemGray6
+        ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = .reynardSystemGray6
         
         ui.keyboardDismissButton.button.isHidden = true
         ui.keyboardDismissButton.button.alpha = 0
@@ -876,9 +888,13 @@ final class BrowserUI {
             return controller.view.safeAreaInsets.top
         }
         
-        if let statusBarHeight = controller.view.window?.windowScene?.statusBarManager?.statusBarFrame.height,
-           statusBarHeight > 0 {
-            return statusBarHeight
+        if #available(iOS 13.0, *) {
+            if let statusBarHeight = controller.view.window?.windowScene?.statusBarManager?.statusBarFrame.height,
+               statusBarHeight > 0 {
+                return statusBarHeight
+            }
+        } else if UIApplication.shared.statusBarFrame.height > 0 {
+            return UIApplication.shared.statusBarFrame.height
         }
         
         return 24
@@ -906,8 +922,8 @@ final class BrowserUI {
         if !usesPadChrome {
             ui.bottomToolbarHeightConstraint.constant = focused ? 0 : 30
             ui.bottomContainerHeightConstraint.constant = focused ? 58 : 94
-            ui.bottomContainer.containerView.backgroundColor = focused ? .clear : .systemGray6
-            ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = focused ? .clear : .systemGray6
+            ui.bottomContainer.containerView.backgroundColor = focused ? .clear : .reynardSystemGray6
+            ui.bottomContainer.bottomSafeAreaFillView.backgroundColor = focused ? .clear : .reynardSystemGray6
         }
         updateChromeLayoutState()
         
@@ -1872,7 +1888,7 @@ extension BrowserViewController: UICollectionViewDataSource, UICollectionViewDel
         snapshot.frame = frameInRoot
         snapshot.isUserInteractionEnabled = false
         snapshot.layer.masksToBounds = false
-        snapshot.layer.shadowColor = UITraitCollection.current.userInterfaceStyle == .dark ? UIColor.white.cgColor : UIColor.black.cgColor
+        snapshot.layer.shadowColor = UIColor.reynardChromeShadow.cgColor
         snapshot.layer.shadowOpacity = 0.18
         snapshot.layer.shadowRadius = 10
         snapshot.layer.shadowOffset = CGSize(width: 0, height: 6)
@@ -2370,10 +2386,10 @@ extension BrowserViewController: SearchViewControllerDelegate {
         clearSuggestionLayoutConstraints()
         if usesDetachedSuggestions {
             view.bringSubviewToFront(overlayController.view)
-            overlayController.view.layer.cornerCurve = .continuous
+            if #available(iOS 13.0, *) { overlayController.view.layer.cornerCurve = .continuous }
             overlayController.view.clipsToBounds = false
             overlayController.view.backgroundColor = .clear
-            let shadowColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .black
+            let shadowColor: UIColor = .reynardChromeShadow
             overlayController.view.layer.shadowColor = shadowColor.cgColor
             overlayController.view.layer.shadowOpacity = 0.16
             overlayController.view.layer.shadowOffset = CGSize(width: 0, height: 8)
@@ -2522,14 +2538,14 @@ extension BrowserViewController: SearchViewControllerDelegate {
     ) -> (displayText: NSAttributedString, committedText: String, submissionText: String)? {
         let title = primaryMatch.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let strippedURL = strippedURLString(primaryMatch.url.absoluteString, trimsTrailingSlash: true)
-        let firstPartAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.label]
+        let firstPartAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.reynardLabel]
         let completionAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.label,
-            .backgroundColor: UIColor.systemGray4
+            .foregroundColor: UIColor.reynardLabel,
+            .backgroundColor: UIColor.reynardSystemGray4
         ]
         let suffixAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: UIColor.systemBlue,
-            .backgroundColor: UIColor.systemGray4
+            .backgroundColor: UIColor.reynardSystemGray4
         ]
         
         if title.hasPrefix(query) {

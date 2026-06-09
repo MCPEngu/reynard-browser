@@ -48,8 +48,8 @@ extension SettingsRootViewController {
         iconImageView.contentMode = .scaleAspectFill
         iconImageView.clipsToBounds = true
         iconImageView.layer.cornerRadius = 13
-        iconImageView.layer.cornerCurve = .continuous
-        iconImageView.backgroundColor = .secondarySystemFill
+        if #available(iOS 13.0, *) { iconImageView.layer.cornerCurve = .continuous }
+        iconImageView.backgroundColor = .reynardSecondarySystemFill
         iconImageView.image = appIconImage()
         
         let nameLabel = UILabel()
@@ -60,12 +60,12 @@ extension SettingsRootViewController {
         let versionLabel = UILabel()
         versionLabel.text = "Version \(latestVersionStr)"
         versionLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
-        versionLabel.textColor = .secondaryLabel
+        versionLabel.textColor = .reynardSecondaryLabel
         
         let sizeLabel = UILabel()
         sizeLabel.text = sizeStr
         sizeLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
-        sizeLabel.textColor = .secondaryLabel
+        sizeLabel.textColor = .reynardSecondaryLabel
         
         let infoStack = UIStackView(arrangedSubviews: [nameLabel, versionLabel, sizeLabel])
         infoStack.translatesAutoresizingMaskIntoConstraints = false
@@ -91,7 +91,7 @@ extension SettingsRootViewController {
         textView.isSelectable = false
         textView.backgroundColor = .clear
         textView.attributedText = releaseNotes
-        textView.textColor = .label
+        textView.textColor = .reynardLabel
         textView.textContainerInset = UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0)
         textView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
         textView.textContainer.lineFragmentPadding = 0
@@ -132,7 +132,7 @@ extension SettingsRootViewController {
         label.numberOfLines = 0
         label.font = UIFont.preferredFont(forTextStyle: .footnote)
         label.adjustsFontForContentSizeCategory = true
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = "Make sure TrollStore's URL Scheme is enabled."
         
         footerView.contentView.addSubview(label)

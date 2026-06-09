@@ -7,7 +7,6 @@
 
 import Foundation
 import GeckoView
-import UniformTypeIdentifiers
 import MobileCoreServices
 
 extension Notification.Name {

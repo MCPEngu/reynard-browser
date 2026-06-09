@@ -15,7 +15,7 @@ final class AddressBarGestures: NSObject {
     }
     
     private unowned let controller: BrowserViewController
-    private let swipeHaptic = UIImpactFeedbackGenerator(style: .rigid)
+    private let swipeHaptic = AddressBarGestures.makeSwipeHaptic()
     
     private var searchPanMode: SearchPanMode = .blocked
     private var horizontalDirection = 0
@@ -25,6 +25,14 @@ final class AddressBarGestures: NSObject {
     
     init(controller: BrowserViewController) {
         self.controller = controller
+    }
+
+    private static func makeSwipeHaptic() -> UIImpactFeedbackGenerator {
+        if #available(iOS 13.0, *) {
+            return UIImpactFeedbackGenerator(style: .rigid)
+        }
+
+        return UIImpactFeedbackGenerator(style: .medium)
     }
     
     func configureGestures() {
@@ -131,11 +139,9 @@ final class AddressBarGestures: NSObject {
     
     private func createAddressBarPreview(for tab: Tab) -> UIView {
         let container = UIView()
-        container.backgroundColor = UIColor { traitCollection in
-            traitCollection.userInterfaceStyle == .dark ? .tertiarySystemBackground : .systemBackground
-        }
+        container.backgroundColor = .reynardChromeBackground
         container.layer.cornerRadius = 16
-        container.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { container.layer.cornerCurve = .continuous }
         container.layer.shadowColor = UIColor.black.cgColor
         container.layer.shadowOpacity = 0.12
         container.layer.shadowRadius = 10
@@ -144,25 +150,25 @@ final class AddressBarGestures: NSObject {
         
         let leadingButton = AddressBarButton(type: .system)
         leadingButton.translatesAutoresizingMaskIntoConstraints = false
-        leadingButton.tintColor = tab.url != nil ? .label : .secondaryLabel
+        leadingButton.tintColor = tab.url != nil ? .reynardLabel : .reynardSecondaryLabel
         if #available(iOS 14.0, *) {
             leadingButton.showsMenuAsPrimaryAction = true
         }
         leadingButton.isUserInteractionEnabled = false
-        leadingButton.setImage(UIImage(systemName: tab.url != nil ? "list.bullet.below.rectangle" : "magnifyingglass"), for: .normal)
+        leadingButton.setImage(UIImage.reynardSystemImage(named: tab.url != nil ? "list.bullet.below.rectangle" : "magnifyingglass"), for: .normal)
         
         let trailingButton = AddressBarButton(type: .system)
         trailingButton.translatesAutoresizingMaskIntoConstraints = false
-        trailingButton.tintColor = .label
+        trailingButton.tintColor = .reynardLabel
         trailingButton.isUserInteractionEnabled = false
-        trailingButton.setImage(UIImage(systemName: tab.isLoading ? "xmark" : "arrow.clockwise"), for: .normal)
+        trailingButton.setImage(UIImage.reynardSystemImage(named: tab.isLoading ? "xmark" : "arrow.clockwise"), for: .normal)
         trailingButton.isHidden = !tab.isLoading && tab.url == nil
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textAlignment = .left
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.attributedText = previewText(for: tab)
@@ -201,25 +207,25 @@ final class AddressBarGestures: NSObject {
               !host.isEmpty else {
             return NSAttributedString(
                 string: urlText,
-                attributes: [.foregroundColor: UIColor.label]
+                attributes: [.foregroundColor: UIColor.reynardLabel]
             )
         }
         
         let attributedText = NSMutableAttributedString(
             string: host,
-            attributes: [.foregroundColor: UIColor.label]
+            attributes: [.foregroundColor: UIColor.reynardLabel]
         )
         attributedText.append(
             NSAttributedString(
                 string: " / ",
-                attributes: [.foregroundColor: UIColor.secondaryLabel]
+                attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
             )
         )
         if !trimmedTitle.isEmpty {
             attributedText.append(
                 NSAttributedString(
                     string: trimmedTitle,
-                    attributes: [.foregroundColor: UIColor.secondaryLabel]
+                    attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
                 )
             )
         }
@@ -229,13 +235,13 @@ final class AddressBarGestures: NSObject {
     private func placeholderPreviewText() -> NSAttributedString {
         NSAttributedString(
             string: AddressBar.placeholderText,
-            attributes: [.foregroundColor: UIColor.placeholderText]
+            attributes: [.foregroundColor: UIColor.reynardPlaceholderText]
         )
     }
     
     private func createContentPreview(for tab: Tab) -> UIView {
         let preview = UIView()
-        preview.backgroundColor = .systemBackground
+        preview.backgroundColor = .reynardSystemBackground
         
         if let image = tab.thumbnail {
             let imageView = UIImageView(image: image)

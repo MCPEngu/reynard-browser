@@ -17,7 +17,7 @@ final class TabBarCell: UICollectionViewCell {
     static let expandedMinimumWidth: CGFloat = 220
     static let collapsedMinimumWidth: CGFloat = 96
     
-    private static let fallbackFavicon = UIImage(systemName: "globe")
+    private static let fallbackFavicon = UIImage.reynardSystemImage(named: "globe")
     
     var onClose: (() -> Void)?
     
@@ -25,7 +25,7 @@ final class TabBarCell: UICollectionViewCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .secondaryLabel
+        imageView.tintColor = .reynardSecondaryLabel
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -34,7 +34,7 @@ final class TabBarCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 14, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.numberOfLines = 1
         label.textAlignment = .center
         return label
@@ -43,12 +43,9 @@ final class TabBarCell: UICollectionViewCell {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "x.square.fill"), for: .normal)
-        button.setPreferredSymbolConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 14, weight: .regular),
-            forImageIn: .normal
-        )
-        button.tintColor = .secondaryLabel
+        button.setImage(UIImage.reynardSystemImage(named: "x.square.fill"), for: .normal)
+        button.reynardSetPreferredSymbolConfiguration(pointSize: 14)
+        button.tintColor = .reynardSecondaryLabel
         button.isHidden = true
         return button
     }()
@@ -56,7 +53,7 @@ final class TabBarCell: UICollectionViewCell {
     private let separatorView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .separator
+        view.backgroundColor = .reynardSeparator
         return view
     }()
     
@@ -143,9 +140,9 @@ final class TabBarCell: UICollectionViewCell {
         let displayTitle = tab.title.isEmpty ? "Homepage" : tab.title
         titleLabel.text = displayTitle
         faviconImageView.image = tab.favicon ?? Self.fallbackFavicon
-        contentView.backgroundColor = selected ? .systemGray6 : .systemGray5
-        titleLabel.textColor = selected ? .label : .secondaryLabel
-        faviconImageView.tintColor = selected ? .label : .secondaryLabel
+        contentView.backgroundColor = selected ? .reynardSystemGray6 : .reynardSystemGray5
+        titleLabel.textColor = selected ? .reynardLabel : .reynardSecondaryLabel
+        faviconImageView.tintColor = selected ? .reynardLabel : .reynardSecondaryLabel
         let minimumVisibleTitle = "WWWWW" as NSString
         let minimumTitleWidth = minimumVisibleTitle.size(withAttributes: [.font: titleLabel.font as Any]).width
         let estimatedTitleBudget = itemWidth - 58

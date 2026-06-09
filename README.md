@@ -2,7 +2,7 @@
 
 # Reynard Browser
 
-Reynard is a **Gecko-based** web browser for iOS 13+.
+Reynard is a **Gecko-based** web browser for iOS 12+.
 
 Unlike other browsers on iOS that are forced to use Apple's **WebKit** engine (including Safari and all third-party browsers), Reynard uses **Gecko**. This is the same engine that powers the Firefox browser on desktop and Android devices.
 
@@ -97,7 +97,7 @@ If either is missing when you launch Reynard, or disconnects while you’re brow
 
 </details>
 
-### Jailbroken (iOS 13)
+### Jailbroken (iOS 12 - 13)
 
 Sideload the `Reynard-Jailbroken.ipa` build using [Filza File Manager](https://www.tigisoftware.com/default/?page_id=78) with [AppSync Unified](https://github.com/akemin-dayo/AppSync) on a **jailbroken device**. You will also benefit from automatic JIT enablement and better performance.
 

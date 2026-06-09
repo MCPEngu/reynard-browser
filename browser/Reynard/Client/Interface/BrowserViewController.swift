@@ -44,7 +44,7 @@ final class BrowserViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .reynardSystemBackground
         
         if shouldEmbedSidebarContainer {
             setupEmbeddedSidebarContainer()
@@ -94,7 +94,9 @@ final class BrowserViewController: UIViewController {
             object: nil
         )
         
-        configureContextMenu()
+        if #available(iOS 13.0, *) {
+            configureContextMenu()
+        }
         observeDownloadState()
         syncDownloadButtonState()
         browserUI.configureLayout()
@@ -321,7 +323,7 @@ final class BrowserViewController: UIViewController {
         }
         
         if fullScreen {
-            if let currentOrientation = view.window?.windowScene?.interfaceOrientation,
+            if let currentOrientation = currentInterfaceOrientation(),
                currentOrientation != .unknown {
                 orientationBeforeFullscreen = currentOrientation
             } else if orientationBeforeFullscreen == nil {
@@ -329,7 +331,7 @@ final class BrowserViewController: UIViewController {
             }
             
             let targetOrientation: UIInterfaceOrientation
-            if let currentOrientation = view.window?.windowScene?.interfaceOrientation,
+            if let currentOrientation = currentInterfaceOrientation(),
                currentOrientation.isLandscape {
                 targetOrientation = currentOrientation
             } else {
@@ -385,5 +387,13 @@ final class BrowserViewController: UIViewController {
         
         UIDevice.current.setValue(deviceOrientation.rawValue, forKey: "orientation")
         UIViewController.attemptRotationToDeviceOrientation()
+    }
+    
+    private func currentInterfaceOrientation() -> UIInterfaceOrientation? {
+        if #available(iOS 13.0, *) {
+            return view.window?.windowScene?.interfaceOrientation
+        }
+        
+        return UIApplication.shared.statusBarOrientation
     }
 }

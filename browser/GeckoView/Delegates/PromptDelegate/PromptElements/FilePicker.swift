@@ -6,8 +6,6 @@
 //
 
 import UIKit
-@preconcurrency import PhotosUI
-import UniformTypeIdentifiers
 import MobileCoreServices
 
 @MainActor
@@ -185,10 +183,11 @@ final class FilePicker: NSObject {
         }
     }
     
+    @available(iOS 14.0, *)
     private func buildMenu() -> UIMenu {
         let photoAction = UIAction(
             title: "Photo Library",
-            image: UIImage(systemName: "photo.on.rectangle"),
+            image: UIImage.reynardSystemImage(named: "photo.on.rectangle"),
             attributes: canUsePhotoLibrary ? [] : .disabled
         ) { [weak self] _ in
             self?.launchFollowupPicker {
@@ -198,7 +197,7 @@ final class FilePicker: NSObject {
         
         let cameraAction = UIAction(
             title: cameraActionTitle,
-            image: UIImage(systemName: "camera"),
+            image: UIImage.reynardSystemImage(named: "camera"),
             attributes: canUseCamera ? [] : .disabled
         ) { [weak self] _ in
             self?.launchFollowupPicker {
@@ -209,7 +208,7 @@ final class FilePicker: NSObject {
         let chooserTitle = mode == .folder ? "Choose Folder" : "Choose File"
         let chooserAction = UIAction(
             title: chooserTitle,
-            image: UIImage(systemName: "doc"),
+            image: UIImage.reynardSystemImage(named: "doc"),
             attributes: []
         ) { [weak self] _ in
             self?.launchFollowupPicker {
@@ -229,33 +228,11 @@ final class FilePicker: NSObject {
         return .camera
     }
     
-    @available(iOS 14.0, *)
-    private var photoLibraryFilter: PHPickerFilter? {
-        let mediaTypes = Set(acceptedTypes.mediaTypes)
-        let supportsImages = mediaTypes.contains(kUTTypeImage as String)
-        let supportsVideos = mediaTypes.contains(kUTTypeMovie as String)
-        
-        switch (supportsImages, supportsVideos) {
-        case (true, true):
-            return .any(of: [.images, .videos])
-        case (true, false):
-            return .images
-        case (false, true):
-            return .videos
-        case (false, false):
-            return nil
-        }
-    }
-    
     private var canUsePhotoLibrary: Bool {
         guard !acceptedTypes.mediaTypes.isEmpty else {
             return false
         }
-        
-        if #available(iOS 14.0, *) {
-            return photoLibraryFilter != nil
-        }
-        
+
         return UIImagePickerController.isSourceTypeAvailable(.photoLibrary) &&
         !resolvedAvailableMediaTypes(for: .photoLibrary).isEmpty
     }
@@ -371,26 +348,16 @@ final class FilePicker: NSObject {
             finish(with: nil)
             return
         }
-        
-        let picker: UIDocumentPickerViewController
-        if #available(iOS 14.0, *) {
-            if mode == .folder {
-                picker = UIDocumentPickerViewController(
-                    forOpeningContentTypes: [UTType.folder],
-                    asCopy: false
-                )
-            } else {
-                let contentTypes = acceptedTypes.documentTypeIdentifiers.compactMap { UTType($0) }
-                picker = UIDocumentPickerViewController(
-                    forOpeningContentTypes: contentTypes.isEmpty ? [UTType.item] : contentTypes
-                )
-            }
+
+        let legacyTypes: [String]
+        if mode == .folder {
+            legacyTypes = [kUTTypeFolder as String]
         } else {
-            let legacyTypes = acceptedTypes.legacyDocumentTypes.isEmpty
+            legacyTypes = acceptedTypes.legacyDocumentTypes.isEmpty
             ? [kUTTypeItem as String]
             : acceptedTypes.legacyDocumentTypes
-            picker = UIDocumentPickerViewController(documentTypes: legacyTypes, in: .open)
         }
+        let picker = UIDocumentPickerViewController(documentTypes: legacyTypes, in: .open)
         picker.delegate = self
         picker.presentationController?.delegate = self
         picker.allowsMultipleSelection = mode == .multiple
@@ -399,34 +366,7 @@ final class FilePicker: NSObject {
     }
     
     private func presentMediaPicker(sourceType: UIImagePickerController.SourceType) {
-        if sourceType == .photoLibrary,
-           #available(iOS 14.0, *) {
-            presentPhotoLibraryPicker()
-            return
-        }
-        
         presentLegacyMediaPicker(sourceType: sourceType)
-    }
-    
-    @available(iOS 14.0, *)
-    private func presentPhotoLibraryPicker() {
-        guard let geckoView = geckoView,
-              let presentingVC = geckoView.nearestViewController(),
-              let filter = photoLibraryFilter else {
-            finish(with: nil)
-            return
-        }
-        
-        var configuration = PHPickerConfiguration()
-        configuration.filter = filter
-        configuration.preferredAssetRepresentationMode = .current
-        configuration.selectionLimit = mode == .multiple ? 0 : 1
-        
-        let picker = PHPickerViewController(configuration: configuration)
-        picker.delegate = self
-        picker.presentationController?.delegate = self
-        presentingVC.present(picker, animated: true)
-        presentedController = picker
     }
     
     private func presentLegacyMediaPicker(sourceType: UIImagePickerController.SourceType) {
@@ -448,7 +388,9 @@ final class FilePicker: NSObject {
         picker.mediaTypes = mediaTypes
         if sourceType == .camera {
             picker.modalPresentationStyle = .fullScreen
-            picker.isModalInPresentation = true
+            if #available(iOS 13.0, *) {
+                picker.isModalInPresentation = true
+            }
         }
         picker.presentationController?.delegate = self
         
@@ -587,10 +529,6 @@ final class FilePicker: NSObject {
     }
     
     private static func typeIdentifier(forFilenameExtension filenameExtension: String) -> String? {
-        if #available(iOS 14.0, *) {
-            return UTType(filenameExtension: filenameExtension)?.identifier
-        }
-        
         return UTTypeCreatePreferredIdentifierForTag(
             kUTTagClassFilenameExtension,
             filenameExtension as CFString,
@@ -599,10 +537,6 @@ final class FilePicker: NSObject {
     }
     
     private static func typeIdentifier(forMIMEType mimeType: String) -> String? {
-        if #available(iOS 14.0, *) {
-            return UTType(mimeType: mimeType)?.identifier
-        }
-        
         return UTTypeCreatePreferredIdentifierForTag(
             kUTTagClassMIMEType,
             mimeType as CFString,
@@ -611,14 +545,6 @@ final class FilePicker: NSObject {
     }
     
     private static func typeConforms(_ typeIdentifier: String, to parentIdentifier: String) -> Bool {
-        if #available(iOS 14.0, *) {
-            guard let type = UTType(typeIdentifier),
-                  let parentType = UTType(parentIdentifier) else {
-                return false
-            }
-            return type.conforms(to: parentType)
-        }
-        
         return UTTypeConformsTo(typeIdentifier as CFString, parentIdentifier as CFString)
     }
     
@@ -659,175 +585,10 @@ final class FilePicker: NSObject {
         }.value
     }
     
-    @available(iOS 14.0, *)
-    private func preparePhotoLibraryResult(from results: [PHPickerResult]) async -> SelectionResult? {
-        let selectedResults = mode == .multiple ? results : Array(results.prefix(1))
-        guard !selectedResults.isEmpty else {
-            return nil
-        }
-        
-        do {
-            try Self.prepareDirectory(stagingDirectoryURL)
-        } catch {
-            return nil
-        }
-        
-        var stagedFiles: [String] = []
-        for result in selectedResults {
-            guard let stagedURL = await Self.stageItemProvider(
-                result.itemProvider,
-                acceptedMediaTypes: acceptedTypes.mediaTypes,
-                in: stagingDirectoryURL
-            ) else {
-                continue
-            }
-            stagedFiles.append(stagedURL.path)
-        }
-        
-        guard !stagedFiles.isEmpty else {
-            return nil
-        }
-        
-        return SelectionResult(files: stagedFiles, filesInWebKitDirectory: [])
-    }
-    
     nonisolated private static func stageFiles(from urls: [URL], in directory: URL) throws -> SelectionResult {
         try prepareDirectory(directory)
         let copiedURLs = try urls.map { try copyItem(at: $0, into: directory, preferredName: nil) }
         return SelectionResult(files: copiedURLs.map(\.path), filesInWebKitDirectory: [])
-    }
-    
-    @available(iOS 14.0, *)
-    private static func stageItemProvider(
-        _ itemProvider: NSItemProvider,
-        acceptedMediaTypes: [String],
-        in directory: URL
-    ) async -> URL? {
-        guard let typeIdentifier = preferredTypeIdentifier(
-            for: itemProvider,
-            acceptedMediaTypes: acceptedMediaTypes
-        ) else {
-            return nil
-        }
-        
-        if let stagedURL = await loadStagedFileRepresentation(
-            from: itemProvider,
-            typeIdentifier: typeIdentifier,
-            in: directory
-        ) {
-            return stagedURL
-        }
-        
-        guard let data = await loadDataRepresentation(
-            from: itemProvider,
-            typeIdentifier: typeIdentifier
-        ) else {
-            return nil
-        }
-        
-        let destinationURL = uniqueDestinationURL(
-            in: directory,
-            preferredName: preferredMediaFileName(sourceURL: nil, typeIdentifier: typeIdentifier)
-        )
-        do {
-            try data.write(to: destinationURL, options: .atomic)
-            return destinationURL
-        } catch {
-            return nil
-        }
-    }
-    
-    @available(iOS 14.0, *)
-    private static func preferredTypeIdentifier(
-        for itemProvider: NSItemProvider,
-        acceptedMediaTypes: [String]
-    ) -> String? {
-        let registeredTypeIdentifiers = itemProvider.registeredTypeIdentifiers
-        
-        if acceptedMediaTypes.contains(kUTTypeMovie as String),
-           let movieType = registeredTypeIdentifiers.first(where: {
-               typeConforms($0, to: kUTTypeMovie as String)
-           }) {
-            return movieType
-        }
-        
-        if acceptedMediaTypes.contains(kUTTypeImage as String),
-           let imageType = registeredTypeIdentifiers.first(where: {
-               typeConforms($0, to: kUTTypeImage as String)
-           }) {
-            return imageType
-        }
-        
-        return registeredTypeIdentifiers.first
-    }
-    
-    @available(iOS 14.0, *)
-    private static func loadStagedFileRepresentation(
-        from itemProvider: NSItemProvider,
-        typeIdentifier: String,
-        in directory: URL
-    ) async -> URL? {
-        await withCheckedContinuation { continuation in
-            itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { sourceURL, _ in
-                guard let sourceURL else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-                
-                let destinationURL = uniqueDestinationURL(
-                    in: directory,
-                    preferredName: preferredMediaFileName(
-                        sourceURL: sourceURL,
-                        typeIdentifier: typeIdentifier
-                    )
-                )
-                
-                do {
-                    try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
-                    continuation.resume(returning: destinationURL)
-                } catch {
-                    continuation.resume(returning: nil)
-                }
-            }
-        }
-    }
-    
-    @available(iOS 14.0, *)
-    private static func loadDataRepresentation(
-        from itemProvider: NSItemProvider,
-        typeIdentifier: String
-    ) async -> Data? {
-        await withCheckedContinuation { continuation in
-            itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
-                continuation.resume(returning: data)
-            }
-        }
-    }
-    
-    @available(iOS 14.0, *)
-    private static func preferredMediaFileName(sourceURL: URL?, typeIdentifier: String) -> String {
-        if let sourceURL {
-            let name = sourceURL.lastPathComponent
-            if !name.isEmpty {
-                return name
-            }
-        }
-        
-        let baseName: String
-        if typeConforms(typeIdentifier, to: kUTTypeMovie as String) {
-            baseName = "Video"
-        } else if typeConforms(typeIdentifier, to: kUTTypeImage as String) {
-            baseName = "Photo"
-        } else {
-            baseName = "File"
-        }
-        
-        if let type = UTType(typeIdentifier),
-           let filenameExtension = type.preferredFilenameExtension {
-            return baseName + "." + filenameExtension
-        }
-        
-        return baseName
     }
     
     nonisolated private static func stageImageData(_ imageData: Data, in directory: URL) throws -> SelectionResult {
@@ -972,19 +733,6 @@ extension FilePicker: UIDocumentPickerDelegate {
             guard let self else { return }
             presentedController = nil
             finish(with: nil)
-        }
-    }
-}
-
-@available(iOS 14.0, *)
-extension FilePicker: PHPickerViewControllerDelegate {
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            picker.dismiss(animated: true)
-            presentedController = nil
-            let result = await preparePhotoLibraryResult(from: results)
-            finish(with: result?.promptResult)
         }
     }
 }

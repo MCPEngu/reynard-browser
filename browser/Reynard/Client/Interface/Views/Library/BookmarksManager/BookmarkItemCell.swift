@@ -21,7 +21,7 @@ final class BookmarkItemCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 1
         return label
@@ -30,7 +30,7 @@ final class BookmarkItemCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .right
         label.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -66,7 +66,7 @@ final class BookmarkItemCell: UITableViewCell {
         ])
         
         separatorInset.left = 56
-        applyIcon(UIImage(systemName: "globe"), tintColor: .secondaryLabel)
+        applyIcon(UIImage.reynardSystemImage(named: "globe"), tintColor: .reynardSecondaryLabel)
     }
     
     required init?(coder: NSCoder) {
@@ -95,7 +95,7 @@ final class BookmarkItemCell: UITableViewCell {
         titleLabel.text = nil
         countLabel.text = nil
         countLabel.isHidden = true
-        applyIcon(UIImage(systemName: "globe"), tintColor: .secondaryLabel)
+        applyIcon(UIImage.reynardSystemImage(named: "globe"), tintColor: .reynardSecondaryLabel)
     }
     
     func apply(folder: BookmarkFolderSnapshot) {
@@ -107,9 +107,9 @@ final class BookmarkItemCell: UITableViewCell {
         countLabel.isHidden = false
         
         if folder.isProtected && folder.title == "Favorites" {
-            applyIcon(UIImage(systemName: "star"), tintColor: .secondaryLabel)
+            applyIcon(UIImage.reynardSystemImage(named: "star"), tintColor: .reynardSecondaryLabel)
         } else {
-            applyIcon(UIImage(systemName: "folder"), tintColor: .secondaryLabel)
+            applyIcon(UIImage.reynardSystemImage(named: "folder"), tintColor: .reynardSecondaryLabel)
         }
     }
     
@@ -126,7 +126,7 @@ final class BookmarkItemCell: UITableViewCell {
             return
         }
         
-        applyIcon(UIImage(systemName: "globe"), tintColor: .secondaryLabel)
+        applyIcon(UIImage.reynardSystemImage(named: "globe"), tintColor: .reynardSecondaryLabel)
         let expectedURL = bookmark.url
         faviconTask = Task { [weak self] in
             guard let self else {
@@ -143,7 +143,7 @@ final class BookmarkItemCell: UITableViewCell {
                     return
                 }
                 
-                self.applyIcon(image ?? UIImage(systemName: "globe"), tintColor: image == nil ? .secondaryLabel : nil)
+                self.applyIcon(image ?? UIImage.reynardSystemImage(named: "globe"), tintColor: image == nil ? .reynardSecondaryLabel : nil)
             }
         }
     }

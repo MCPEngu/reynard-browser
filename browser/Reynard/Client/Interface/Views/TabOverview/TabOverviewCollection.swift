@@ -62,13 +62,13 @@ final class TabOverviewCollection {
         let imageView = UIImageView(image: UIImage(named: "private.mode.icon")?.withRenderingMode(.alwaysTemplate))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .secondaryLabel
+        imageView.tintColor = .reynardSecondaryLabel
         
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Private Browsing"
         titleLabel.textAlignment = .center
-        titleLabel.textColor = .secondaryLabel
+        titleLabel.textColor = .reynardSecondaryLabel
         titleLabel.font = .preferredFont(forTextStyle: .title2)
         titleLabel.adjustsFontForContentSizeCategory = true
         
@@ -76,7 +76,7 @@ final class TabOverviewCollection {
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.text = "Reynard won't remember any of your browsing history or cookies. However, downloads and new bookmarks will be saved."
         subtitleLabel.textAlignment = .center
-        subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.textColor = .reynardSecondaryLabel
         subtitleLabel.font = .preferredFont(forTextStyle: .subheadline)
         subtitleLabel.adjustsFontForContentSizeCategory = true
         subtitleLabel.numberOfLines = 0

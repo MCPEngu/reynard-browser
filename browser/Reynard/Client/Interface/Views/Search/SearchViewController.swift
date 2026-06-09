@@ -42,8 +42,8 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
     private let backgroundContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemBackground
-        view.layer.cornerCurve = .continuous
+        view.backgroundColor = .reynardSystemBackground
+        if #available(iOS 13.0, *) { view.layer.cornerCurve = .continuous }
         view.layer.cornerRadius = 36
         view.layer.masksToBounds = true
         return view
@@ -54,10 +54,10 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
         return view
     }()
     private let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        let tableView = UITableView(frame: .zero, style: .reynardInsetGrouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.alwaysBounceVertical = true
-        tableView.backgroundColor = .systemBackground
+        tableView.backgroundColor = .reynardSystemBackground
         tableView.keyboardDismissMode = .none
         tableView.separatorStyle = .none
         tableView.rowHeight = UITableView.automaticDimension
@@ -74,12 +74,12 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
     }()
     private lazy var suggestionsHeaderView: UIView = {
         let container = UIView()
-        container.backgroundColor = .systemBackground
+        container.backgroundColor = .reynardSystemBackground
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = Constants.suggestionsSectionTitle
         
         container.addSubview(label)
@@ -94,12 +94,12 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
     }()
     private lazy var auxiliarySectionHeaderView: UIView = {
         let container = UIView()
-        container.backgroundColor = .systemBackground
+        container.backgroundColor = .reynardSystemBackground
         
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.text = Constants.auxiliarySectionTitle
         
         container.addSubview(label)
@@ -406,8 +406,8 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
     }
     
     private func applyOverlayAppearance() {
-        let backgroundColor: UIColor = usesDetachedOverlayAppearance ? .clear : .systemBackground
-        let tableBackgroundColor: UIColor = usesDetachedOverlayAppearance ? .clear : .systemBackground
+        let backgroundColor: UIColor = usesDetachedOverlayAppearance ? .clear : .reynardSystemBackground
+        let tableBackgroundColor: UIColor = usesDetachedOverlayAppearance ? .clear : .reynardSystemBackground
         backgroundContainerView.backgroundColor = backgroundColor
         backgroundContainerView.layer.masksToBounds = usesDetachedOverlayAppearance
         tableView.backgroundColor = tableBackgroundColor
@@ -415,7 +415,7 @@ final class SearchViewController: UIViewController, UITableViewDataSource, UITab
         auxiliarySectionHeaderView.backgroundColor = tableBackgroundColor
         blurView.effect = usesDetachedOverlayAppearance ? UIBlurEffect(style: .systemChromeMaterial) : nil
         blurView.contentView.backgroundColor = usesDetachedOverlayAppearance
-        ? UIColor.systemBackground.withAlphaComponent(0.28)
+        ? UIColor.reynardSystemBackground.withAlphaComponent(0.28)
         : .clear
         
         if #available(iOS 26.0, *) {
@@ -434,8 +434,8 @@ private final class SearchSuggestionCell: UITableViewCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(systemName: "magnifyingglass")
-        imageView.tintColor = .label
+        imageView.image = UIImage.reynardSystemImage(named: "magnifyingglass")
+        imageView.tintColor = .reynardLabel
         return imageView
     }()
     
@@ -443,7 +443,7 @@ private final class SearchSuggestionCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 2
         label.lineBreakMode = .byTruncatingTail
@@ -454,8 +454,8 @@ private final class SearchSuggestionCell: UITableViewCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(systemName: "arrow.down.left.circle")
-        imageView.tintColor = .tertiaryLabel
+        imageView.image = UIImage.reynardSystemImage(named: "arrow.down.left.circle")
+        imageView.tintColor = .reynardTertiaryLabel
         return imageView
     }()
     
@@ -514,7 +514,7 @@ private final class SearchSuggestionCell: UITableViewCell {
         guard !normalizedQuery.isEmpty else {
             return NSAttributedString(
                 string: suggestion,
-                attributes: [.foregroundColor: UIColor.secondaryLabel]
+                attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
             )
         }
         
@@ -524,7 +524,7 @@ private final class SearchSuggestionCell: UITableViewCell {
             let sharedPrefix = String(suggestion.prefix(sharedLength))
             attributed.append(NSAttributedString(
                 string: sharedPrefix,
-                attributes: [.foregroundColor: UIColor.label]
+                attributes: [.foregroundColor: UIColor.reynardLabel]
             ))
         }
         
@@ -532,14 +532,14 @@ private final class SearchSuggestionCell: UITableViewCell {
         if !suffix.isEmpty {
             attributed.append(NSAttributedString(
                 string: suffix,
-                attributes: [.foregroundColor: UIColor.secondaryLabel]
+                attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
             ))
         }
         
         if attributed.length == 0 {
             return NSAttributedString(
                 string: suggestion,
-                attributes: [.foregroundColor: UIColor.secondaryLabel]
+                attributes: [.foregroundColor: UIColor.reynardSecondaryLabel]
             )
         }
         
@@ -565,7 +565,7 @@ private final class SearchSuggestionCell: UITableViewCell {
     }
     
     func setShowsFilledBackground(_ showsFilledBackground: Bool) {
-        contentView.backgroundColor = showsFilledBackground ? .secondarySystemBackground : .clear
+        contentView.backgroundColor = showsFilledBackground ? .reynardSecondarySystemBackground : .clear
     }
     
     func setShowsTrailingIcon(_ showsTrailingIcon: Bool) {
@@ -573,7 +573,7 @@ private final class SearchSuggestionCell: UITableViewCell {
     }
     
     func setTrailingIconPointsUp(_ pointsUp: Bool) {
-        trailingImageView.image = UIImage(systemName: pointsUp ? "arrow.up.left.circle" : "arrow.down.left.circle")
+        trailingImageView.image = UIImage.reynardSystemImage(named: pointsUp ? "arrow.up.left.circle" : "arrow.down.left.circle")
     }
 }
 
@@ -587,8 +587,8 @@ private final class SearchBookmarkCell: UITableViewCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .label
-        imageView.image = UIImage(systemName: "globe")
+        imageView.tintColor = .reynardLabel
+        imageView.image = UIImage.reynardSystemImage(named: "globe")
         return imageView
     }()
     
@@ -596,7 +596,7 @@ private final class SearchBookmarkCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize, weight: .medium)
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.adjustsFontForContentSizeCategory = true
@@ -607,7 +607,7 @@ private final class SearchBookmarkCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .caption1)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.adjustsFontForContentSizeCategory = true
@@ -630,7 +630,7 @@ private final class SearchBookmarkCell: UITableViewCell {
         clipsToBounds = true
         contentView.clipsToBounds = true
         backgroundColor = .clear
-        contentView.backgroundColor = .secondarySystemBackground
+        contentView.backgroundColor = .reynardSecondarySystemBackground
         
         contentView.addSubview(iconView)
         contentView.addSubview(textContainerView)
@@ -672,8 +672,8 @@ private final class SearchBookmarkCell: UITableViewCell {
         faviconTask = nil
         titleLabel.text = nil
         urlLabel.text = nil
-        iconView.image = UIImage(systemName: "globe")
-        iconView.tintColor = .label
+        iconView.image = UIImage.reynardSystemImage(named: "globe")
+        iconView.tintColor = .reynardLabel
     }
     
     func apply(bookmark: BookmarkSnapshot) {
@@ -690,8 +690,8 @@ private final class SearchBookmarkCell: UITableViewCell {
             return
         }
         
-        iconView.image = UIImage(systemName: "globe")
-        iconView.tintColor = .label
+        iconView.image = UIImage.reynardSystemImage(named: "globe")
+        iconView.tintColor = .reynardLabel
         
         let expectedURL = bookmark.url
         faviconTask = Task { [weak self] in
@@ -702,8 +702,8 @@ private final class SearchBookmarkCell: UITableViewCell {
             
             await MainActor.run {
                 guard self.representedURL == expectedURL else { return }
-                self.iconView.image = image ?? UIImage(systemName: "globe")
-                self.iconView.tintColor = image == nil ? .label : nil
+                self.iconView.image = image ?? UIImage.reynardSystemImage(named: "globe")
+                self.iconView.tintColor = image == nil ? .reynardLabel : nil
             }
         }
     }
@@ -717,17 +717,17 @@ private final class SearchBookmarkCell: UITableViewCell {
         switch auxiliaryMatch.kind {
         case .bookmark:
             urlLabel.text = displayURLString(for: auxiliaryMatch.url)
-            iconView.image = UIImage(systemName: "book")
+            iconView.image = UIImage.reynardSystemImage(named: "book")
         case .history:
             let relativeDate = Self.relativeDateFormatter.localizedString(for: auxiliaryMatch.historyLastVisitedAt ?? Date(), relativeTo: Date())
             urlLabel.text = "\(hostDisplayString(for: auxiliaryMatch.url)) · Visited \(relativeDate)"
-            iconView.image = UIImage(systemName: "clock")
+            iconView.image = UIImage.reynardSystemImage(named: "clock")
         case .tab:
             urlLabel.text = "\(hostDisplayString(for: auxiliaryMatch.url)) · Opened Tab"
-            iconView.image = UIImage(systemName: "square.on.square")
+            iconView.image = UIImage.reynardSystemImage(named: "square.on.square")
         }
         
-        iconView.tintColor = .label
+        iconView.tintColor = .reynardLabel
         
         guard showsFavicon else {
             return
@@ -739,8 +739,8 @@ private final class SearchBookmarkCell: UITableViewCell {
             return
         }
         
-        iconView.image = UIImage(systemName: "globe")
-        iconView.tintColor = .label
+        iconView.image = UIImage.reynardSystemImage(named: "globe")
+        iconView.tintColor = .reynardLabel
         
         let expectedURL = auxiliaryMatch.url
         faviconTask = Task { [weak self] in
@@ -751,14 +751,14 @@ private final class SearchBookmarkCell: UITableViewCell {
             
             await MainActor.run {
                 guard self.representedURL == expectedURL else { return }
-                self.iconView.image = image ?? UIImage(systemName: "globe")
-                self.iconView.tintColor = image == nil ? .label : nil
+                self.iconView.image = image ?? UIImage.reynardSystemImage(named: "globe")
+                self.iconView.tintColor = image == nil ? .reynardLabel : nil
             }
         }
     }
     
     func setShowsFilledBackground(_ showsFilledBackground: Bool) {
-        contentView.backgroundColor = showsFilledBackground ? .secondarySystemBackground : .clear
+        contentView.backgroundColor = showsFilledBackground ? .reynardSecondarySystemBackground : .clear
     }
     
     private func hostDisplayString(for url: URL) -> String {

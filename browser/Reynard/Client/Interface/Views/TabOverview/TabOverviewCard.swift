@@ -10,7 +10,7 @@ import UIKit
 final class TabOverviewCard: UICollectionViewCell {
     static let reuseIdentifier = "TabOverviewCard"
     
-    private static let fallbackFavicon = UIImage(systemName: "globe")
+    private static let fallbackFavicon = UIImage.reynardSystemImage(named: "globe")
     private let basePreviewInset: CGFloat = 1
     private let liftedPreviewInset: CGFloat = -4
     private let baseShadowOpacity: Float = 0.12
@@ -26,10 +26,10 @@ final class TabOverviewCard: UICollectionViewCell {
     private let previewShadowView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .reynardSystemBackground
         view.layer.cornerRadius = 18
-        view.layer.cornerCurve = .continuous
-        view.layer.shadowColor = UITraitCollection.current.userInterfaceStyle == .dark ? UIColor.white.cgColor : UIColor.black.cgColor
+        if #available(iOS 13.0, *) { view.layer.cornerCurve = .continuous }
+        view.layer.shadowColor = UIColor.reynardChromeShadow.cgColor
         view.layer.shadowOpacity = 0.12
         view.layer.shadowRadius = 8
         view.layer.shadowOffset = CGSize(width: 0, height: 3)
@@ -52,9 +52,9 @@ final class TabOverviewCard: UICollectionViewCell {
     private let previewContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .reynardSystemBackground
         view.layer.cornerRadius = 18
-        view.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { view.layer.cornerCurve = .continuous }
         view.layer.masksToBounds = true
         return view
     }()
@@ -76,15 +76,12 @@ final class TabOverviewCard: UICollectionViewCell {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "xmark"), for: .normal)
-        button.setPreferredSymbolConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 12, weight: .medium),
-            forImageIn: .normal
-        )
+        button.setImage(UIImage.reynardSystemImage(named: "xmark"), for: .normal)
+        button.reynardSetPreferredSymbolConfiguration(pointSize: 12, weight: .medium)
         button.backgroundColor = .systemGray.withAlphaComponent(0.6)
         button.tintColor = .white
         button.layer.cornerRadius = 12
-        button.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         return button
     }()
     
@@ -93,7 +90,7 @@ final class TabOverviewCard: UICollectionViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 14, weight: .medium)
         label.textAlignment = .center
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.numberOfLines = 1
         return label
     }()
@@ -102,7 +99,7 @@ final class TabOverviewCard: UICollectionViewCell {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .secondaryLabel
+        imageView.tintColor = .reynardSecondaryLabel
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -227,7 +224,7 @@ final class TabOverviewCard: UICollectionViewCell {
         faviconImageView.image = Self.fallbackFavicon
         onClose = nil
         contentView.alpha = 1
-        previewShadowView.layer.shadowColor = UITraitCollection.current.userInterfaceStyle == .dark ? UIColor.white.cgColor : UIColor.black.cgColor
+        previewShadowView.layer.shadowColor = UIColor.reynardChromeShadow.cgColor
         setReorderLifted(false, animated: false)
     }
     

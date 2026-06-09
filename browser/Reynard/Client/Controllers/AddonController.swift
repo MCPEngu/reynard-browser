@@ -354,7 +354,9 @@ final class AddonController: NSObject, AddonEmbedderDelegate {
         
         // Hack: Use .overFullScreen so GeckoView can scroll
         popupViewController.modalPresentationStyle = .overFullScreen
-        popupViewController.isModalInPresentation = true
+        if #available(iOS 13.0, *) {
+            popupViewController.isModalInPresentation = true
+        }
         
         let presenter = self.topPresentedViewController() ?? self.controller
         presenter?.present(popupViewController, animated: true)
@@ -441,7 +443,7 @@ final class AddonController: NSObject, AddonEmbedderDelegate {
         if let cached = iconCache.object(forKey: cacheKey) {
             return cached
         }
-        return UIImage(systemName: "puzzlepiece.extension")
+        return UIImage.reynardSystemImage(named: "puzzlepiece.extension")
     }
     
     private func prefetchIconIfNeeded(for addon: Addon) {
@@ -576,7 +578,7 @@ private final class AddonPopupViewController: UIViewController, ContentDelegate,
         
         let sheetView = UIView()
         sheetView.translatesAutoresizingMaskIntoConstraints = false
-        sheetView.backgroundColor = UIColor.systemBackground
+        sheetView.backgroundColor = UIColor.reynardSystemBackground
         sheetView.layer.cornerRadius = 16
         sheetView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         sheetView.clipsToBounds = true
@@ -597,11 +599,11 @@ private final class AddonPopupViewController: UIViewController, ContentDelegate,
         containerView.layer.shadowRadius = 12
         containerView.layer.shadowOffset = CGSize(width: 0, height: -4)
         containerView.layer.borderWidth = 0.5
-        containerView.layer.borderColor = UIColor.separator.cgColor
+        containerView.layer.borderColor = UIColor.reynardSeparator.cgColor
         
         let closeButton = UIButton(type: .system)
-        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
-        closeButton.tintColor = .label
+        closeButton.setImage(UIImage.reynardSystemImage(named: "xmark"), for: .normal)
+        closeButton.tintColor = .reynardLabel
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         

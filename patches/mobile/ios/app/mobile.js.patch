@@ -43,6 +43,25 @@ index e835b1c33d86..db9f3f6c210c 100644
  // Enable the restricted sandbox for content processes.
  pref("security.sandbox.content.level", 1);
  
++// Keep A7/1 GB devices within a tight memory envelope.
++pref("dom.ipc.processCount", 1);
++pref("dom.ipc.processCount.webIsolated", 1);
++pref("dom.ipc.keepProcessesAlive.web", 1);
++pref("dom.ipc.processPrelaunch.enabled", false);
++pref("browser.tabs.remote.separatePrivilegedContentProcess", false);
++pref("browser.tabs.remote.separatePrivilegedMozillaWebContentProcess", false);
++pref("browser.sessionhistory.max_total_viewers", 0);
++pref("browser.cache.memory.enable", false);
++pref("browser.cache.disk.capacity", 32768);
++pref("image.mem.max_decoded_image_kb", 32768);
++pref("image.mem.surfacecache.max_size_kb", 32768);
++pref("media.memory_cache_max_size", 32768);
++pref("media.cache_size", 32768);
++pref("javascript.options.mem.gc_allocation_threshold_mb", 16);
++pref("javascript.options.mem.gc_max_empty_chunk_count", 1);
++pref("extensions.webextensions.background-delayed-startup", true);
++pref("extensions.getAddons.cache.enabled", false);
++
 +// Allow autoplay configuration
 +pref("media.geckoview.autoplay.request", true);
 +

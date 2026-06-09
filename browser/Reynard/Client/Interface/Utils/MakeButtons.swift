@@ -21,7 +21,7 @@ enum MakeButtons {
     ]
     
     private static func toolbarImage(for imageName: String) -> UIImage? {
-        if let image = UIImage(systemName: imageName) {
+        if let image = UIImage.reynardSystemImage(named: imageName) {
             return image
         }
         
@@ -31,11 +31,11 @@ enum MakeButtons {
         
         switch imageName {
         case "chevron.backward":
-            return UIImage(systemName: "chevron.left")
+            return UIImage.reynardSystemImage(named: "chevron.left")
         case "chevron.forward":
-            return UIImage(systemName: "chevron.right")
+            return UIImage.reynardSystemImage(named: "chevron.right")
         case "list.bullet.below.rectangle":
-            return UIImage(systemName: "line.horizontal.3")
+            return UIImage.reynardSystemImage(named: "line.horizontal.3")
         default:
             return nil
         }
@@ -46,15 +46,12 @@ enum MakeButtons {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(toolbarImage(for: imageName), for: .normal)
         if imageName == "plus" {
-            button.setPreferredSymbolConfiguration(
-                UIImage.SymbolConfiguration(pointSize: 20, weight: .regular),
-                forImageIn: .normal
-            )
+            button.reynardSetPreferredSymbolConfiguration(pointSize: 20)
         }
-        button.tintColor = .label
+        button.tintColor = .reynardLabel
         button.addTarget(target, action: action, for: .touchUpInside)
         button.layer.cornerRadius = 10
-        button.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         return button
     }
     
@@ -67,8 +64,8 @@ enum MakeButtons {
     static func makeLibraryActionsButton(target: AnyObject, imageName: String, action: Selector) -> UIButton {
         let button = LibraryActionsButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .label
-        button.layer.cornerCurve = .continuous
+        button.tintColor = .reynardLabel
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         button.layer.masksToBounds = true
         button.addTarget(target, action: action, for: .touchUpInside)
         updateLibraryActionsButton(button, imageName: imageName)
@@ -79,12 +76,12 @@ enum MakeButtons {
         if hasLiquidGlass, #available(iOS 26.0, *) {
             var configuration = UIButton.Configuration.glass()
             configuration.image = toolbarImage(for: imageName)
-            configuration.baseForegroundColor = .label
+            configuration.baseForegroundColor = .reynardLabel
             configuration.contentInsets = .zero
             button.configuration = configuration
         } else {
             button.setImage(toolbarImage(for: imageName), for: .normal)
-            button.backgroundColor = .quaternarySystemFill
+            button.backgroundColor = .reynardQuaternarySystemFill
         }
     }
     
@@ -107,15 +104,12 @@ enum MakeButtons {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(toolbarImage(for: imageName), for: .normal)
-        button.setPreferredSymbolConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 17, weight: .regular),
-            forImageIn: .normal
-        )
-        button.tintColor = isFilled ? .systemBackground : .label
-        button.backgroundColor = isFilled ? .label : .quaternarySystemFill
+        button.reynardSetPreferredSymbolConfiguration(pointSize: 17)
+        button.tintColor = isFilled ? .reynardSystemBackground : .reynardLabel
+        button.backgroundColor = isFilled ? .reynardLabel : .reynardQuaternarySystemFill
         button.layer.borderWidth = isFilled ? 0 : 1
-        button.layer.borderColor = isFilled ? UIColor.clear.cgColor : UIColor.systemFill.cgColor
-        button.layer.cornerCurve = .continuous
+        button.layer.borderColor = isFilled ? UIColor.clear.cgColor : UIColor.reynardSystemFill.cgColor
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         button.layer.cornerRadius = 21
         button.addTarget(controller, action: action, for: .touchUpInside)
         return button
@@ -123,7 +117,7 @@ enum MakeButtons {
     
     static func makeTabOverviewBarButtonItem(controller: BrowserViewController, systemItem: UIBarButtonItem.SystemItem, action: Selector) -> UIBarButtonItem {
         let item = UIBarButtonItem(barButtonSystemItem: systemItem, target: controller, action: action)
-        item.tintColor = .label
+        item.tintColor = .reynardLabel
         return item
     }
 }
@@ -144,13 +138,11 @@ final class DownloadToolbarButton: UIButton {
     private let buttonSideLength: CGFloat = 40
     private let progressTrackWidth: CGFloat = 18
     
-    private let iconSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 17, weight: .regular)
-    
     private let iconView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFit
-        view.tintColor = .label
+        view.tintColor = .reynardLabel
         view.clipsToBounds = false
         return view
     }()
@@ -158,7 +150,7 @@ final class DownloadToolbarButton: UIButton {
     private let progressTrackView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .tertiarySystemFill
+        view.backgroundColor = .reynardTertiarySystemFill
         view.layer.cornerRadius = 1.25
         view.isHidden = true
         return view
@@ -167,7 +159,7 @@ final class DownloadToolbarButton: UIButton {
     private let progressFillView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .label
+        view.backgroundColor = .reynardLabel
         view.layer.cornerRadius = 1.25
         view.isHidden = true
         return view
@@ -179,9 +171,9 @@ final class DownloadToolbarButton: UIButton {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        tintColor = .label
+        tintColor = .reynardLabel
         layer.cornerRadius = 10
-        layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { layer.cornerCurve = .continuous }
         layer.masksToBounds = false
         clipsToBounds = false
         contentHorizontalAlignment = .center
@@ -229,7 +221,7 @@ final class DownloadToolbarButton: UIButton {
             }
         }
         
-        iconView.image = UIImage(systemName: "arrow.down.circle", withConfiguration: iconSymbolConfiguration)
+        iconView.image = UIImage.reynardSystemImage(named: "arrow.down.circle", pointSize: 17)
         
         let progress = min(max(CGFloat(summary.aggregateProgress), 0), 1)
         let showsProgress = summary.activeCount > 0

@@ -23,7 +23,7 @@ enum ImagePreviewMenu {
         } actionProvider: { _ in
             let shareImageAction = UIAction(
                 title: "Share Image",
-                image: UIImage(systemName: "square.and.arrow.up")
+                image: UIImage.reynardSystemImage(named: "square.and.arrow.up")
             ) { _ in
                 Task {
                     guard let image = await ImagePreviewLoader.image(from: url) else {
@@ -37,7 +37,7 @@ enum ImagePreviewMenu {
             
             let saveToPhotosAction = UIAction(
                 title: "Save to Photos",
-                image: UIImage(systemName: "square.and.arrow.down")
+                image: UIImage.reynardSystemImage(named: "square.and.arrow.down")
             ) { _ in
                 Task {
                     guard let image = await ImagePreviewLoader.image(from: url) else {
@@ -51,7 +51,7 @@ enum ImagePreviewMenu {
             
             let copyAction = UIAction(
                 title: "Copy",
-                image: UIImage(systemName: "document.on.document")
+                image: UIImage.reynardSystemImage(named: "document.on.document")
             ) { _ in
                 Task {
                     guard let image = await ImagePreviewLoader.image(from: url) else {
@@ -97,7 +97,7 @@ final class ImagePreviewViewController: UIViewController {
     
     override func loadView() {
         let view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .reynardSystemBackground
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit

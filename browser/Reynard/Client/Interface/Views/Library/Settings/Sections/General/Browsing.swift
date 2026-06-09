@@ -11,7 +11,7 @@ final class BrowsingPreferencesViewController: SettingsTableViewController {
     private let requestDesktopWebsiteSwitch = UISwitch()
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Browsing"
     }
     

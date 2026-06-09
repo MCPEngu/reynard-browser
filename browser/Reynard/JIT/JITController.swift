@@ -288,16 +288,21 @@ final class JITController {
     }
     
     private static func topViewControllerForPresentation() -> UIViewController? {
-        let foregroundScenes = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .filter { $0.activationState == .foregroundActive }
-        
-        guard let scene = foregroundScenes.first else {
-            return nil
+        let root: UIViewController?
+        if #available(iOS 13.0, *) {
+            let foregroundScenes = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .filter { $0.activationState == .foregroundActive }
+            
+            guard let scene = foregroundScenes.first else {
+                return nil
+            }
+            
+            root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
+            ?? scene.windows.first(where: { !$0.isHidden })?.rootViewController
+        } else {
+            root = UIApplication.shared.keyWindow?.rootViewController
         }
-        
-        let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
-        ?? scene.windows.first(where: { !$0.isHidden })?.rootViewController
         
         guard let root else {
             return nil
@@ -319,9 +324,13 @@ final class JITController {
             return false
         }
         
-        return UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .contains { $0.activationState == .foregroundActive }
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .contains { $0.activationState == .foregroundActive }
+        }
+        
+        return UIApplication.shared.keyWindow?.rootViewController != nil
     }
     
     @objc private func handleApplicationDidBecomeActive() {

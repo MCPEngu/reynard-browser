@@ -52,7 +52,7 @@ final class TopBarButtons {
     }
     
     func setMenuButtonIndicatesUpdate(_ hasUpdate: Bool) {
-        menuButton.setImage(hasUpdate ? UIImage(named: "ellipsis.circle.badge") : UIImage(systemName: "ellipsis.circle"), for: .normal)
+        menuButton.setImage(hasUpdate ? UIImage(named: "ellipsis.circle.badge") : UIImage.reynardSystemImage(named: "ellipsis.circle"), for: .normal)
     }
     
     func syncSidebarButton(splitViewController: UISplitViewController?) {

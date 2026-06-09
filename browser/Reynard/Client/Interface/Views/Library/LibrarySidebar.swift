@@ -7,29 +7,23 @@
 
 import UIKit
 
-final class LibrarySidebarViewController: UIViewController, UICollectionViewDelegate, UINavigationControllerDelegate {
-    private let mainSection = "main"
+final class LibrarySidebarViewController: UIViewController,
+                                          UICollectionViewDataSource,
+                                          UICollectionViewDelegateFlowLayout,
+                                          UINavigationControllerDelegate {
     private let cellReuseIdentifier = "LibrarySidebarCell"
-    private var dataSource: UICollectionViewDiffableDataSource<String, LibrarySection>!
+    private let sections = LibrarySection.allCases
     private lazy var sidebarButton = makeLibrarySidebarButton(target: self, action: #selector(collapseSidebarFromRoot))
     
     private lazy var collectionView: UICollectionView = {
-        let layout: UICollectionViewLayout
-        if #available(iOS 14.0, *) {
-            var configuration = UICollectionLayoutListConfiguration(appearance: .sidebar)
-            configuration.backgroundColor = .systemGray6
-            layout = UICollectionViewCompositionalLayout.list(using: configuration)
-        } else {
-            let flowLayout = UICollectionViewFlowLayout()
-            flowLayout.itemSize = CGSize(width: 1, height: 48)
-            flowLayout.minimumLineSpacing = 0
-            flowLayout.sectionInset = .zero
-            layout = flowLayout
-        }
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = .zero
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         view.delegate = self
+        view.dataSource = self
         return view
     }()
     
@@ -43,10 +37,8 @@ final class LibrarySidebarViewController: UIViewController, UICollectionViewDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         configureCollectionView()
-        configureDataSource()
-        applySnapshot()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -84,51 +76,18 @@ final class LibrarySidebarViewController: UIViewController, UICollectionViewDele
         ])
     }
     
-    private func configureDataSource() {
-        if #available(iOS 14.0, *) {
-            let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, LibrarySection> { cell, _, section in
-                var content = cell.defaultContentConfiguration()
-                content.text = section.title
-                content.image = UIImage(systemName: section.symbolName)
-                content.imageProperties.tintColor = .label
-                cell.contentConfiguration = content
-                cell.accessories = []
-            }
-            
-            dataSource = UICollectionViewDiffableDataSource<String, LibrarySection>(collectionView: collectionView) { collectionView, indexPath, item in
-                collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
-            }
-            return
-        }
-        
-        dataSource = UICollectionViewDiffableDataSource<String, LibrarySection>(collectionView: collectionView) { collectionView, indexPath, item in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: self.cellReuseIdentifier, for: indexPath)
-            if let sidebarCell = cell as? LibrarySidebarCell {
-                sidebarCell.configure(title: item.title, symbolName: item.symbolName)
-            }
-            return cell
-        }
-    }
-    
-    private func applySnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<String, LibrarySection>()
-        snapshot.appendSections([mainSection])
-        snapshot.appendItems(LibrarySection.allCases, toSection: mainSection)
-        dataSource.apply(snapshot, animatingDifferences: false)
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let section = dataSource.itemIdentifier(for: indexPath) else {
+        guard sections.indices.contains(indexPath.item) else {
             return
         }
         
-        showSection(section, animated: true)
+        showSection(sections[indexPath.item], animated: true)
     }
     
     func showSection(_ section: LibrarySection, animated: Bool) {
         loadViewIfNeeded()
         
-        let indexPath = dataSource.indexPath(for: section)
+        let indexPath = sections.firstIndex(of: section).map { IndexPath(item: $0, section: 0) }
         
         if let indexPath {
             collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
@@ -139,6 +98,28 @@ final class LibrarySidebarViewController: UIViewController, UICollectionViewDele
         if let indexPath {
             collectionView.deselectItem(at: indexPath, animated: animated)
         }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        sections.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellReuseIdentifier, for: indexPath)
+        if let sidebarCell = cell as? LibrarySidebarCell,
+           sections.indices.contains(indexPath.item) {
+            let section = sections[indexPath.item]
+            sidebarCell.configure(title: section.title, symbolName: section.symbolName)
+        }
+        return cell
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        CGSize(width: collectionView.bounds.width, height: 48)
     }
     
     private func makeSectionViewController(for section: LibrarySection) -> UIViewController {
@@ -178,11 +159,13 @@ private final class LibrarySidebarCell: UICollectionViewCell {
         super.init(frame: frame)
         contentView.backgroundColor = .clear
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .label
-        iconView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(textStyle: .body)
+        iconView.tintColor = .reynardLabel
+        if #available(iOS 13.0, *) {
+            iconView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(textStyle: .body)
+        }
         contentView.addSubview(iconView)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.textColor = .label
+        titleLabel.textColor = .reynardLabel
         titleLabel.font = .preferredFont(forTextStyle: .body)
         titleLabel.adjustsFontForContentSizeCategory = true
         contentView.addSubview(titleLabel)
@@ -204,7 +187,7 @@ private final class LibrarySidebarCell: UICollectionViewCell {
     
     func configure(title: String, symbolName: String) {
         titleLabel.text = title
-        iconView.image = UIImage(systemName: symbolName)
+        iconView.image = UIImage.reynardSystemImage(named: symbolName)
     }
 }
 
@@ -230,7 +213,7 @@ private final class LibrarySidebarHostedSectionViewController: UIViewController 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .reynardSystemGray6
         
         hostedView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(hostedView)
@@ -299,7 +282,7 @@ final class LibraryEmptyBackgroundView: UIView {
     private let label: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.textAlignment = .center
         label.numberOfLines = 0
         return label

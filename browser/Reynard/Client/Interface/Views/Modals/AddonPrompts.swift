@@ -49,7 +49,7 @@ final class AddonPromptViewController: UITableViewController {
         button.backgroundColor = view.tintColor
         button.tintColor = .white
         button.layer.cornerRadius = 25
-        button.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         button.titleLabel?.font = .preferredFont(forTextStyle: .headline)
         button.setTitle(prompt.kind == .install ? "Add" : "Allow", for: .normal)
         button.addTarget(self, action: #selector(confirmPrompt), for: .touchUpInside)
@@ -63,7 +63,7 @@ final class AddonPromptViewController: UITableViewController {
         permissionRows = content.permissionRows
         domainRows = content.domainRows
         dataCollectionDescription = content.dataCollectionDescription
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = Self.promptTitle(for: prompt)
     }
     
@@ -74,14 +74,14 @@ final class AddonPromptViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         
         if #available(iOS 26.0, *), MakeButtons.hasLiquidGlass {
             navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissModal))
             ]
-            navigationItem.rightBarButtonItems?.first?.tintColor = .label
+            navigationItem.rightBarButtonItems?.first?.tintColor = .reynardLabel
         } else {
             navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissModal))
@@ -173,7 +173,7 @@ final class AddonPromptViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
         ?? UITableViewCell(style: .default, reuseIdentifier: "Cell")
         cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.textColor = .label
+        cell.textLabel?.textColor = .reynardLabel
         cell.selectionStyle = .none
         
         guard visibleSections.indices.contains(indexPath.section) else {
@@ -327,7 +327,7 @@ private final class AddonPromptSitesViewController: UITableViewController {
     
     init(sites: [String]) {
         self.sites = sites
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Sites"
     }
     
@@ -337,7 +337,7 @@ private final class AddonPromptSitesViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
     }
     

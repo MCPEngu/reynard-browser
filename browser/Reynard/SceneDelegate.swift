@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(iOS 13.0, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
@@ -65,30 +66,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func handleIncomingURL(_ incomingURL: URL) {
         guard let browserViewController = window?.rootViewController as? BrowserViewController,
-              let resolvedURL = resolvedBrowserURL(from: incomingURL) else {
+              let resolvedURL = BrowserURLResolver.resolvedBrowserURL(from: incomingURL) else {
             return
         }
         
         DispatchQueue.main.async {
             browserViewController.openExternalURL(resolvedURL)
         }
-    }
-    
-    private func resolvedBrowserURL(from incomingURL: URL) -> URL? {
-        guard let scheme = incomingURL.scheme?.lowercased() else {
-            return nil
-        }
-        
-        if scheme == "http" || scheme == "https" {
-            return incomingURL
-        }
-        
-        guard scheme == "reynard",
-              let components = URLComponents(url: incomingURL, resolvingAgainstBaseURL: false),
-              let encodedURL = components.queryItems?.first(where: { $0.name == "url" })?.value else {
-            return nil
-        }
-        
-        return URL(string: encodedURL)
     }
 }

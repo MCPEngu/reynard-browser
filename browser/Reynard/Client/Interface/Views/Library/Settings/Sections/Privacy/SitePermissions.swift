@@ -111,7 +111,7 @@ final class SitePermissionsViewController: SettingsTableViewController {
     }
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Site Permissions"
     }
     
@@ -154,7 +154,7 @@ final class SitePermissionsViewController: SettingsTableViewController {
             if indexPath.row == 0 {
                 let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
                 cell.textLabel?.text = disabledPermissionsDescription()
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 cell.textLabel?.numberOfLines = 0
                 cell.selectionStyle = .none
                 return cell
@@ -177,14 +177,14 @@ final class SitePermissionsViewController: SettingsTableViewController {
                 permission: row.permission
             )
             if isPermissionDisabled(row.permission) {
-                cell.textLabel?.textColor = .secondaryLabel
-                cell.detailTextLabel?.textColor = .tertiaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
+                cell.detailTextLabel?.textColor = .reynardTertiaryLabel
                 cell.accessoryType = .none
                 cell.selectionStyle = .none
                 cell.isUserInteractionEnabled = false
             } else {
-                cell.textLabel?.textColor = .label
-                cell.detailTextLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardLabel
+                cell.detailTextLabel?.textColor = .reynardSecondaryLabel
                 cell.accessoryType = .disclosureIndicator
                 cell.selectionStyle = .default
                 cell.isUserInteractionEnabled = true
@@ -199,7 +199,7 @@ final class SitePermissionsViewController: SettingsTableViewController {
             } else {
                 cell.detailTextLabel?.text = nil
             }
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryType = .none
             return cell
         }
@@ -364,7 +364,7 @@ private final class SitePermissionDetailsViewController: SettingsTableViewContro
     init(permission: SitePermission, title: String, store: SitePermissionStore = .shared) {
         self.permission = permission
         self.store = store
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         self.title = title
     }
     
@@ -443,7 +443,7 @@ private final class SitePermissionDetailsViewController: SettingsTableViewContro
             let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
             if allowedSites.isEmpty {
                 cell.textLabel?.text = "No Sites Added"
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 cell.detailTextLabel?.text = nil
                 cell.selectionStyle = .none
                 return cell
@@ -454,15 +454,15 @@ private final class SitePermissionDetailsViewController: SettingsTableViewContro
             let site = allowedSites[indexPath.row]
             cell.textLabel?.text = site.host
             cell.detailTextLabel?.text = subtitle(for: .allowed, at: site.updatedAt)
-            cell.textLabel?.textColor = .label
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.selectionStyle = .default
             return cell
         case .deniedSites:
             let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
             if deniedSites.isEmpty {
                 cell.textLabel?.text = "No Sites Added"
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 cell.detailTextLabel?.text = nil
                 cell.selectionStyle = .none
                 return cell
@@ -473,15 +473,15 @@ private final class SitePermissionDetailsViewController: SettingsTableViewContro
             let site = deniedSites[indexPath.row]
             cell.textLabel?.text = site.host
             cell.detailTextLabel?.text = subtitle(for: .blocked, at: site.updatedAt)
-            cell.textLabel?.textColor = .label
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.selectionStyle = .default
             return cell
         case .changedSites:
             let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
             if changedSites.isEmpty {
                 cell.textLabel?.text = "No Sites Added"
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 cell.detailTextLabel?.text = nil
                 cell.selectionStyle = .none
                 return cell
@@ -495,8 +495,8 @@ private final class SitePermissionDetailsViewController: SettingsTableViewContro
                 for: changedSite.action,
                 permission: permission
             )
-            cell.textLabel?.textColor = .label
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.selectionStyle = .default
             return cell
         }

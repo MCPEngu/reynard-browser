@@ -13,22 +13,17 @@ final class KeyboardDismissButton {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.alpha = 0
         button.isHidden = true
-        button.backgroundColor = UIColor { traitCollection in
-            traitCollection.userInterfaceStyle == .dark ? .tertiarySystemBackground : .systemBackground
-        }
-        button.tintColor = .label
-        button.layer.cornerCurve = .continuous
+        button.backgroundColor = .reynardChromeBackground
+        button.tintColor = .reynardLabel
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         button.layer.cornerRadius = 21
-        button.layer.shadowColor = UITraitCollection.current.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.3).cgColor : UIColor.black.cgColor
+        button.layer.shadowColor = UIColor.reynardChromeShadow.cgColor
         button.layer.shadowOpacity = 0.2
         button.layer.shadowRadius = 12
         button.layer.shadowOffset = CGSize(width: 0, height: 4)
         button.layer.masksToBounds = false
-        button.setImage(UIImage(systemName: "xmark"), for: .normal)
-        button.setPreferredSymbolConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 20, weight: .regular),
-            forImageIn: .normal
-        )
+        button.setImage(UIImage.reynardSystemImage(named: "xmark"), for: .normal)
+        button.reynardSetPreferredSymbolConfiguration(pointSize: 20)
         return button
     }()
     

@@ -270,7 +270,7 @@ final class TabOverviewPresentation {
         
         pageSnapshot.frame = sourceFrame
         pageSnapshot.layer.cornerRadius = 18
-        pageSnapshot.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { pageSnapshot.layer.cornerCurve = .continuous }
         pageSnapshot.layer.masksToBounds = true
         
         bottomSnapshot.frame = controller.browserUI.tabOverviewBottomBar.barView.frame
@@ -465,7 +465,7 @@ final class TabOverviewPresentation {
         
         pageSnapshot.frame = sourceFrame
         pageSnapshot.layer.cornerRadius = 18
-        pageSnapshot.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { pageSnapshot.layer.cornerCurve = .continuous }
         pageSnapshot.layer.masksToBounds = true
         
         controller.view.addSubview(pageSnapshot)
@@ -537,7 +537,7 @@ final class TabOverviewPresentation {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 18
-        imageView.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { imageView.layer.cornerCurve = .continuous }
         return imageView
     }
     

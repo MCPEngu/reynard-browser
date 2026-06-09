@@ -7,7 +7,6 @@
 
 import UIKit
 import QuickLookThumbnailing
-import UniformTypeIdentifiers
 import MobileCoreServices
 
 final class DownloadItemCell: UITableViewCell {
@@ -25,7 +24,7 @@ final class DownloadItemCell: UITableViewCell {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFit
-        view.tintColor = .label
+        view.tintColor = .reynardLabel
         return view
     }()
     
@@ -33,7 +32,7 @@ final class DownloadItemCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
+        label.textColor = .reynardLabel
         label.numberOfLines = 1
         return label
     }()
@@ -42,7 +41,7 @@ final class DownloadItemCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .subheadline)
-        label.textColor = .secondaryLabel
+        label.textColor = .reynardSecondaryLabel
         label.numberOfLines = 2
         return label
     }()
@@ -50,8 +49,8 @@ final class DownloadItemCell: UITableViewCell {
     private let progressView: UIProgressView = {
         let view = UIProgressView(progressViewStyle: .default)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.trackTintColor = .tertiarySystemFill
-        view.progressTintColor = .label
+        view.trackTintColor = .reynardTertiarySystemFill
+        view.progressTintColor = .reynardLabel
         view.isHidden = true
         return view
     }()
@@ -115,19 +114,19 @@ final class DownloadItemCell: UITableViewCell {
         representedItemID = nil
         lastDetailsLabelUpdateTime = 0
         contentView.alpha = 1
-        fileNameLabel.textColor = .label
-        detailsLabel.textColor = .secondaryLabel
+        fileNameLabel.textColor = .reynardLabel
+        detailsLabel.textColor = .reynardSecondaryLabel
         iconView.image = nil
         iconView.transform = .identity
-        iconView.tintColor = .label
+        iconView.tintColor = .reynardLabel
     }
     
     func apply(item: DownloadItemSnapshot) {
         fileNameLabel.text = item.fileName
         let isDeleted = item.state == .completed && !item.fileExists
         contentView.alpha = isDeleted ? 0.45 : 1
-        fileNameLabel.textColor = isDeleted ? .secondaryLabel : .label
-        detailsLabel.textColor = .secondaryLabel
+        fileNameLabel.textColor = isDeleted ? .reynardSecondaryLabel : .reynardLabel
+        detailsLabel.textColor = .reynardSecondaryLabel
         
         switch item.state {
         case .downloading:
@@ -165,7 +164,7 @@ final class DownloadItemCell: UITableViewCell {
             let placeholderIcon = Self.iconProvider.genericPlaceholderIcon()
             iconView.image = placeholderIcon
             iconView.transform = .identity
-            iconView.tintColor = placeholderIcon == nil ? .label : nil
+            iconView.tintColor = placeholderIcon == nil ? .reynardLabel : nil
             
         case .completed:
             representedItemID = item.id
@@ -304,11 +303,7 @@ private final class DownloadFileIconProvider {
             representationTypes: representationTypes
         )
         request.iconMode = true
-        if #available(iOS 14.0, *),
-           let contentTypeIdentifier,
-           let contentType = UTType(contentTypeIdentifier) {
-            request.contentType = contentType
-        }
+        _ = contentTypeIdentifier
         
         generator.generateBestRepresentation(for: request) { thumbnail, _ in
             DispatchQueue.main.async {

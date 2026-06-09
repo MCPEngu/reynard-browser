@@ -7,7 +7,6 @@
 
 import GeckoView
 import UIKit
-import UniformTypeIdentifiers
 import MobileCoreServices
 
 final class AddonsPreferencesViewController: SettingsTableViewController {
@@ -65,7 +64,7 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
     }
     
     init() {
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Add-ons"
     }
     
@@ -121,7 +120,7 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
                 let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
                 cell.selectionStyle = .none
                 cell.textLabel?.text = isLoadingAddons ? "Loading Add-ons..." : "No Add-ons Installed"
-                cell.textLabel?.textColor = .secondaryLabel
+                cell.textLabel?.textColor = .reynardSecondaryLabel
                 return cell
             }
             
@@ -134,9 +133,9 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
             let cell = UITableViewCell(style: statusText == nil ? .default : .subtitle, reuseIdentifier: nil)
             cell.textLabel?.text = addon.metaData.name ?? addon.id
             cell.detailTextLabel?.text = statusText
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryType = .disclosureIndicator
-            cell.imageView?.image = Self.sharedIconCache.object(forKey: addon.id as NSString) ?? UIImage(systemName: "puzzlepiece.extension")
+            cell.imageView?.image = Self.sharedIconCache.object(forKey: addon.id as NSString) ?? UIImage.reynardSystemImage(named: "puzzlepiece.extension")
             applyVisualState(to: cell, for: addon)
             loadIconIfNeeded(for: addon)
             return cell
@@ -150,9 +149,9 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
             let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
             cell.textLabel?.text = addon.metaData.name ?? addon.id
             cell.detailTextLabel?.text = statusText
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryType = .disclosureIndicator
-            cell.imageView?.image = Self.sharedIconCache.object(forKey: addon.id as NSString) ?? UIImage(systemName: "puzzlepiece.extension")
+            cell.imageView?.image = Self.sharedIconCache.object(forKey: addon.id as NSString) ?? UIImage.reynardSystemImage(named: "puzzlepiece.extension")
             applyVisualState(to: cell, for: addon)
             loadIconIfNeeded(for: addon)
             return cell
@@ -164,13 +163,13 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
                 cell.textLabel?.textColor = view.tintColor
             case 1:
                 cell.textLabel?.text = isInstallingAddonFromFile ? "Installing Add-on..." : "Install Add-on From File..."
-                cell.textLabel?.textColor = isInstallingAddonFromFile ? .secondaryLabel : view.tintColor
+                cell.textLabel?.textColor = isInstallingAddonFromFile ? .reynardSecondaryLabel : view.tintColor
                 if isInstallingAddonFromFile {
                     cell.selectionStyle = .none
                 }
             case 2:
                 cell.textLabel?.text = updateActionTitle
-                cell.textLabel?.textColor = isUpdatingAddons ? .secondaryLabel : view.tintColor
+                cell.textLabel?.textColor = isUpdatingAddons ? .reynardSecondaryLabel : view.tintColor
                 if isUpdatingAddons {
                     cell.selectionStyle = .none
                 }
@@ -311,24 +310,13 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
     }
     
     private func presentAddonFilePicker() {
-        let picker: UIDocumentPickerViewController
-        if #available(iOS 14.0, *) {
-            picker = UIDocumentPickerViewController(
-                forOpeningContentTypes: [
-                    UTType(importedAs: "org.mozilla.xpi-extension"),
-                    .zip,
-                ],
-                asCopy: true
-            )
-        } else {
-            picker = UIDocumentPickerViewController(
-                documentTypes: [
-                    "org.mozilla.xpi-extension",
-                    kUTTypeZipArchive as String,
-                ],
-                in: .import
-            )
-        }
+        let picker = UIDocumentPickerViewController(
+            documentTypes: [
+                "org.mozilla.xpi-extension",
+                kUTTypeZipArchive as String,
+            ],
+            in: .import
+        )
         if #available(iOS 13.0, *) {
             picker.shouldShowFileExtensions = true
         }
@@ -423,7 +411,7 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
                     return
                 }
                 
-                cell.imageView?.image = image ?? UIImage(systemName: "puzzlepiece.extension")
+                cell.imageView?.image = image ?? UIImage.reynardSystemImage(named: "puzzlepiece.extension")
                 cell.setNeedsLayout()
             }
         }
@@ -441,14 +429,14 @@ final class AddonsPreferencesViewController: SettingsTableViewController {
     
     private func applyVisualState(to cell: UITableViewCell, for addon: Addon) {
         guard addon.metaData.enabled == false else {
-            cell.textLabel?.textColor = .label
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.imageView?.alpha = 1
             return
         }
         
-        cell.textLabel?.textColor = .secondaryLabel
-        cell.detailTextLabel?.textColor = .tertiaryLabel
+        cell.textLabel?.textColor = .reynardSecondaryLabel
+        cell.detailTextLabel?.textColor = .reynardTertiaryLabel
         cell.imageView?.alpha = 0.5
     }
     
@@ -708,7 +696,7 @@ final class AddonDetailsPreferencesViewController: SettingsTableViewController {
     
     init(addonID: String) {
         self.addonID = addonID
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Add-on"
     }
     
@@ -937,12 +925,12 @@ final class AddonDetailsPreferencesViewController: SettingsTableViewController {
             cell.textLabel?.text = addon?.metaData.incognito == .notAllowed
             ? "Not Allowed in Private Browsing"
             : "Allow in Private Browsing"
-            cell.textLabel?.textColor = addon?.metaData.incognito == .notAllowed ? .secondaryLabel : .label
+            cell.textLabel?.textColor = addon?.metaData.incognito == .notAllowed ? .reynardSecondaryLabel : .reynardLabel
             cell.selectionStyle = .none
             cell.accessoryView = privateBrowsingSwitch
         case .remove:
             cell.textLabel?.text = "Remove"
-            cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .secondaryLabel : .systemRed
+            cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .reynardSecondaryLabel : .systemRed
         case .settings, .details, .permissions:
             break
         }
@@ -961,7 +949,7 @@ final class AddonDetailsPreferencesViewController: SettingsTableViewController {
         
         let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
         cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .secondaryLabel : view.tintColor
+        cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .reynardSecondaryLabel : view.tintColor
         cell.accessoryType = .disclosureIndicator
         
         switch navigationRows[indexPath.row] {
@@ -973,7 +961,7 @@ final class AddonDetailsPreferencesViewController: SettingsTableViewController {
             cell.textLabel?.text = "Permissions"
         case .remove:
             cell.textLabel?.text = "Remove"
-            cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .secondaryLabel : .systemRed
+            cell.textLabel?.textColor = addon == nil || isUpdatingAddon ? .reynardSecondaryLabel : .systemRed
             cell.accessoryType = .none
         case .enabled, .privateBrowsing:
             break
@@ -1128,7 +1116,7 @@ private final class AddonInformationPreferencesViewController: SettingsTableView
     
     init(addonID: String) {
         self.addonID = addonID
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Details"
     }
     
@@ -1197,7 +1185,7 @@ private final class AddonInformationPreferencesViewController: SettingsTableView
             let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
             cell.textLabel?.text = row.title
             cell.detailTextLabel?.text = row.value
-            cell.detailTextLabel?.textColor = row.link == nil ? .secondaryLabel : view.tintColor
+            cell.detailTextLabel?.textColor = row.link == nil ? .reynardSecondaryLabel : view.tintColor
             cell.accessoryType = row.link == nil ? .none : .disclosureIndicator
             return cell
         case .links:
@@ -1209,7 +1197,7 @@ private final class AddonInformationPreferencesViewController: SettingsTableView
             cell.textLabel?.text = row.title
             cell.detailTextLabel?.text = row.value
             cell.detailTextLabel?.numberOfLines = 0
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryType = .disclosureIndicator
             return cell
         }
@@ -1445,7 +1433,7 @@ private final class AddonPermissionsPreferencesViewController: SettingsTableView
     
     init(addonID: String) {
         self.addonID = addonID
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Permissions"
     }
     
@@ -1505,7 +1493,7 @@ private final class AddonPermissionsPreferencesViewController: SettingsTableView
             cell.textLabel?.numberOfLines = 0
             cell.detailTextLabel?.text = subtitle
             cell.detailTextLabel?.numberOfLines = 0
-            cell.detailTextLabel?.textColor = .secondaryLabel
+            cell.detailTextLabel?.textColor = .reynardSecondaryLabel
             cell.accessoryView = toggle
             return cell
         case .warning(let text):
@@ -1513,7 +1501,7 @@ private final class AddonPermissionsPreferencesViewController: SettingsTableView
             cell.selectionStyle = .none
             cell.textLabel?.text = text
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.textColor = .secondaryLabel
+            cell.textLabel?.textColor = .reynardSecondaryLabel
             return cell
         }
     }

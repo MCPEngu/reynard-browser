@@ -18,7 +18,7 @@ final class ClearHistoryViewController: UITableViewController {
         button.backgroundColor = .systemRed
         button.tintColor = .white
         button.layer.cornerRadius = 25
-        button.layer.cornerCurve = .continuous
+        if #available(iOS 13.0, *) { button.layer.cornerCurve = .continuous }
         button.titleLabel?.font = .preferredFont(forTextStyle: .headline)
         button.setTitle("Clear History", for: .normal)
         button.addTarget(self, action: #selector(clearHistory), for: .touchUpInside)
@@ -29,7 +29,7 @@ final class ClearHistoryViewController: UITableViewController {
     init(tabCount: Int, onClear: @escaping (Date?, Bool) -> Void) {
         self.tabCount = tabCount
         self.onClear = onClear
-        super.init(style: .insetGrouped)
+        super.init(style: .reynardInsetGrouped)
         title = "Clear History"
     }
     
@@ -40,12 +40,12 @@ final class ClearHistoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .reynardSystemGroupedBackground
         navigationItem.largeTitleDisplayMode = .never
         
         if #available(iOS 26.0, *), MakeButtons.hasLiquidGlass {
             navigationItem.rightBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissModal))]
-            navigationItem.rightBarButtonItems?.first?.tintColor = .label
+            navigationItem.rightBarButtonItems?.first?.tintColor = .reynardLabel
         } else {
             navigationItem.rightBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissModal))]
         }
