@@ -61,7 +61,7 @@ jobs:
 
           @protocol SwiftGeckoViewRuntime <NSObject>
           - (id<SwiftEventDispatcher> _Nonnull)runtimeDispatcher;
-          - (id<SwiftEventDispatcher> _Nonnull)dispatcherByName:(const char* _Nonnull)name;
+          - (id<SwiftEventDispatcher> _Nonnull)dispatcherByName:(const char* _Nullable)name;
           @optional
           - (void)childProcessDidStartWithPID:(int32_t)pid processType:(NSString* _Nonnull)processType;
           @end
@@ -78,6 +78,7 @@ jobs:
           #define IOS_BOOTSTRAP_H
 
           #import <Foundation/Foundation.h>
+          #import <UIKit/UIKit.h>
           #include <stdbool.h>
           #include <stdint.h>
           #include <xpc/xpc.h>
@@ -88,6 +89,12 @@ jobs:
 
           @protocol GeckoProcessExtension;
           @protocol SwiftGeckoViewRuntime;
+          @protocol SwiftEventDispatcher;
+
+          @interface GeckoViewWindow : NSObject
+          - (UIView* _Nullable)view;
+          - (void)close;
+          @end
 
           #ifdef __cplusplus
           extern "C" {
@@ -99,6 +106,11 @@ jobs:
                                            id<GeckoProcessExtension> _Nonnull process,
                                            id<SwiftGeckoViewRuntime> _Nonnull runtime);
           MOZ_EXPORT void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26);
+          MOZ_EXPORT GeckoViewWindow* _Nullable GeckoViewOpenWindow(
+              NSString* _Nonnull windowId,
+              id<SwiftEventDispatcher> _Nonnull dispatcher,
+              NSDictionary* _Nonnull options,
+              BOOL isPrivate);
 
           #ifdef __cplusplus
           }
@@ -109,8 +121,14 @@ jobs:
 
           cat > browser/GeckoView/Support/ReynardCIBootstrapStubs.m <<'EOF'
           #import <Foundation/Foundation.h>
+          #import <UIKit/UIKit.h>
           #import <GeckoView/GeckoViewSwiftSupport.h>
           #import <GeckoView/IOSBootstrap.h>
+
+          @implementation GeckoViewWindow
+          - (UIView* _Nullable)view { return nil; }
+          - (void)close {}
+          @end
 
           void MainProcessInit(int argc, char* _Nullable argv[_Nullable],
                                id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
@@ -120,6 +138,14 @@ jobs:
                                 id<SwiftGeckoViewRuntime> _Nonnull runtime) {}
 
           void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26) {}
+
+          GeckoViewWindow* _Nullable GeckoViewOpenWindow(
+              NSString* _Nonnull windowId,
+              id<SwiftEventDispatcher> _Nonnull dispatcher,
+              NSDictionary* _Nonnull options,
+              BOOL isPrivate) {
+            return [GeckoViewWindow new];
+          }
           EOF
 
       - name: Build Reynard
@@ -134,5 +160,6 @@ jobs:
             GECKO_DIST="$RUNNER_TEMP/gecko-dist" \
             HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
             OTHER_LDFLAGS="" \
+            OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
