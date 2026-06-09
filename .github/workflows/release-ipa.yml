@@ -20,8 +20,6 @@ jobs:
     runs-on: macos-15
     env:
       RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
-      GECKO_DIST: ${{ runner.temp }}/gecko-dist
-      GECKO_INCLUDE: ${{ runner.temp }}/gecko-include
 
     steps:
       - name: Checkout release source
@@ -35,6 +33,9 @@ jobs:
       - name: Prepare CI Gecko stubs
         run: |
           set -euo pipefail
+
+          GECKO_INCLUDE="$RUNNER_TEMP/gecko-include"
+          GECKO_DIST="$RUNNER_TEMP/gecko-dist"
 
           mkdir -p "$GECKO_INCLUDE/GeckoView"
           mkdir -p "$GECKO_DIST/bin"
@@ -295,9 +296,9 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -archivePath dist/Reynard.xcarchive \
-            GECKO_DIST="$GECKO_DIST" \
+            GECKO_DIST="$RUNNER_TEMP/gecko-dist" \
             GECKO_CODE_SIGN_IDENTITY="-" \
-            HEADER_SEARCH_PATHS="$GECKO_INCLUDE" \
+            HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
             OTHER_LDFLAGS="" \
             OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
             CODE_SIGNING_ALLOWED=NO \
