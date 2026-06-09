@@ -107,7 +107,7 @@ jobs:
                                            id<SwiftGeckoViewRuntime> _Nonnull runtime);
           MOZ_EXPORT void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26);
           MOZ_EXPORT GeckoViewWindow* _Nullable GeckoViewOpenWindow(
-              NSString* _Nonnull windowId,
+              NSString* _Nullable windowId,
               id<SwiftEventDispatcher> _Nonnull dispatcher,
               NSDictionary* _Nonnull options,
               BOOL isPrivate);
@@ -140,7 +140,7 @@ jobs:
           void ReportJITStatusForChild(int32_t pid, bool enabled, bool hasTXM26) {}
 
           GeckoViewWindow* _Nullable GeckoViewOpenWindow(
-              NSString* _Nonnull windowId,
+              NSString* _Nullable windowId,
               id<SwiftEventDispatcher> _Nonnull dispatcher,
               NSDictionary* _Nonnull options,
               BOOL isPrivate) {
