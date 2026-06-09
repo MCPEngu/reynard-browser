@@ -25,7 +25,15 @@ jobs:
 
           mkdir -p "$RUNNER_TEMP/gecko-include/GeckoView"
           mkdir -p "$RUNNER_TEMP/gecko-dist/bin"
+          mkdir -p engine/firefox/toolkit/mozapps/extensions/default-theme
           mkdir -p browser/GeckoView/Support
+
+          cat > "$RUNNER_TEMP/gecko-dist/bin/reynard-ci-xul.c" <<'EOF'
+          int main(void) { return 0; }
+          EOF
+          clang "$RUNNER_TEMP/gecko-dist/bin/reynard-ci-xul.c" -o "$RUNNER_TEMP/gecko-dist/bin/XUL"
+          rm "$RUNNER_TEMP/gecko-dist/bin/reynard-ci-xul.c"
+          echo '{}' > engine/firefox/toolkit/mozapps/extensions/default-theme/manifest.json
 
           cat > "$RUNNER_TEMP/gecko-include/mozilla-config.h" <<'EOF'
           #ifndef MOZILLA_CONFIG_H
@@ -270,5 +278,7 @@ jobs:
             HEADER_SEARCH_PATHS="$RUNNER_TEMP/gecko-include" \
             OTHER_LDFLAGS="" \
             OTHER_SWIFT_FLAGS="-Xfrontend -disable-availability-checking" \
+            EXPANDED_CODE_SIGN_IDENTITY="-" \
+            EXPANDED_CODE_SIGN_IDENTITY_NAME="-" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO

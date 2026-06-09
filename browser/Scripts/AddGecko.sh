@@ -15,7 +15,10 @@ mkdir -p "${FRAMEWORKS_DIR}"
 mkdir -p "${GECKOVIEW_FW_FRAMEWORKS}"
 
 # copy dylibs and XUL, then sign
-cp -fL "${GECKO_DIST_BIN}/"*.dylib "${FRAMEWORKS_DIR}/"
+set -- "${GECKO_DIST_BIN}/"*.dylib
+if [ -f "$1" ]; then
+	cp -fL "$@" "${FRAMEWORKS_DIR}/"
+fi
 cp -fL "${GECKO_DIST_BIN}/XUL" "${GECKOVIEW_FW}/XUL"
 
 for file in "${GECKOVIEW_FW}/XUL" "${FRAMEWORKS_DIR}/"*.dylib; do
