@@ -38,6 +38,23 @@ mkdir -p "$WORK_DIR/Payload"
 cp -R "$APP_PATH" "$WORK_DIR/Payload/"
 
 cd "$WORK_DIR"
+
+cat > OpenIn.entitlements <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>application-identifier</key>
+	<string>com.minh-ton.Reynard.OpenIn</string>
+	<key>get-task-allow</key>
+	<true/>
+</dict>
+</plist>
+EOF
+
+ldid -SOpenIn.entitlements "Payload/Reynard.app/PlugIns/OpenIn.appex/OpenIn"
+ldid -S"$ROOT_DIR/browser/Reynard/Entitlements/Reynard.private.entitlements" "Payload/Reynard.app/Reynard"
+
 zip -r ../Reynard.ipa Payload -x "._*" -x ".DS_Store" -x "__MACOSX" # normal ipa
 
 PTRACE_JIT_SRC="$ROOT_DIR/browser/Reynard/TrollStore/JIT/ptrace_jit.c"

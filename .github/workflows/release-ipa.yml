@@ -324,6 +324,26 @@ jobs:
           # point used by the Gecko helper process extension.
           rm -rf "$APP_PATH/PlugIns/Reynard Helper.appex"
 
+          cat > dist/OpenIn.ci.entitlements <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>application-identifier</key>
+            <string>com.minh-ton.Reynard.OpenIn</string>
+            <key>get-task-allow</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          if [ -d "$APP_PATH/Frameworks" ]; then
+            find "$APP_PATH/Frameworks" -type f \( -name '*.dylib' -o -name XUL \) -exec codesign --force --sign - {} \;
+            find "$APP_PATH/Frameworks" -maxdepth 1 -type d -name '*.framework' -exec codesign --force --sign - {} \;
+          fi
+          codesign --force --sign - --entitlements dist/OpenIn.ci.entitlements "$APP_PATH/PlugIns/OpenIn.appex"
+          codesign --force --sign - --entitlements browser/Reynard/Entitlements/Reynard.private.entitlements "$APP_PATH"
+
           rm -rf dist/Reynard dist/Reynard.ipa
           mkdir -p dist/Reynard/Payload
           ditto "$APP_PATH" "dist/Reynard/Payload/$(basename "$APP_PATH")"
