@@ -63,6 +63,7 @@ jobs:
           - (void)dispatchToSwift:(NSString* _Nonnull)type
                            message:(id _Nullable)message
                           callback:(id<EventCallback> _Nullable)callback;
+          - (void)attach:(id<GeckoEventDispatcher> _Nullable)dispatcher;
           - (void)activate;
           - (BOOL)hasListener:(NSString* _Nonnull)type;
           @end
@@ -271,12 +272,7 @@ jobs:
               NSDictionary* _Nonnull options,
               BOOL isPrivate) {
             GeckoViewWindow* window = [[GeckoViewWindow alloc] initWithDispatcher:dispatcher];
-            SEL attachSelector = NSSelectorFromString(@"attach:");
-            if ([dispatcher respondsToSelector:attachSelector]) {
-              void (*attachImp)(id, SEL, id<GeckoEventDispatcher>) =
-                  (void (*)(id, SEL, id<GeckoEventDispatcher>))[dispatcher methodForSelector:attachSelector];
-              attachImp(dispatcher, attachSelector, window);
-            }
+            [dispatcher attach:window];
             [dispatcher activate];
             return window;
           }
