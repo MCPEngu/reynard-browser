@@ -47,7 +47,16 @@ extension BrowserViewController {
     }
     
     var shouldEmbedSidebarContainer: Bool {
-        isSidebarContainerHost && traitCollection.userInterfaceIdiom == .pad
+        guard isSidebarContainerHost,
+              traitCollection.userInterfaceIdiom == .pad else {
+            return false
+        }
+        
+        guard #available(iOS 13.0, *) else {
+            return false
+        }
+        
+        return true
     }
     
     func syncSidebarButtonItem() {
