@@ -46,4 +46,8 @@ if #unavailable(iOS 14.0),
    getEntitlementValue("com.apple.private.security.no-sandbox") {
     configureUnsandboxedAppDataDirectories()
 }
+// On iOS 12 the real UIApplication delegate is Gecko's AppShellDelegate (libxul
+// calls UIApplicationMain below), and there are no scenes, so nothing would build
+// the UI. Register the iOS 12 window installer before UIApplicationMain runs.
+LegacyWindowBootstrap.installIfNeeded()
 GeckoRuntime.main(argc: CommandLine.argc, argv: CommandLine.unsafeArgv)
